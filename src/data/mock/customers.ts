@@ -1,0 +1,55 @@
+import type { Customer } from '@/types/modules';
+
+/** Mock customers — no backend endpoint is documented for this module. */
+export const mockCustomers: Customer[] = [
+  {
+    id: 'cus-001',
+    name: 'Grace Mushi',
+    phone: '+255 754 220 118',
+    email: 'grace.mushi@example.co.tz',
+    totalSpent: 1250000,
+    orders: 42,
+    lastVisit: '2026-10-04',
+    status: 'Active',
+  },
+  {
+    id: 'cus-002',
+    name: 'John Komba',
+    phone: '+255 712 887 003',
+    email: 'john.komba@example.co.tz',
+    totalSpent: 860000,
+    orders: 28,
+    lastVisit: '2026-10-03',
+    status: 'Active',
+  },
+  {
+    id: 'cus-003',
+    name: 'Neema Joseph',
+    phone: '+255 733 145 776',
+    email: 'neema.j@example.co.tz',
+    totalSpent: 210000,
+    orders: 7,
+    lastVisit: '2026-09-29',
+    status: 'Active',
+  },
+  {
+    id: 'cus-004',
+    name: 'Baraka Traders',
+    phone: '+255 768 990 412',
+    email: 'orders@barakatraders.co.tz',
+    totalSpent: 3200000,
+    orders: 11,
+    lastVisit: '2026-09-27',
+    status: 'New',
+  },
+  {
+    id: 'cus-005',
+    name: 'Happiness Mwaikambo',
+    phone: '+255 715 662 330',
+    email: 'happym@example.co.tz',
+    totalSpent: 96000,
+    orders: 3,
+    lastVisit: '2026-09-20',
+    status: 'New',
+  },
+];
