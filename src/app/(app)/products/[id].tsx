@@ -1,20 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, Text, View } from 'react-native';
 
 import { Badge, Button, Card, ConfirmDialog, ErrorView, Header, Loader, Section } from '@/components/';
 import { deleteProduct, fetchProduct } from '@/api/products';
 import type { ProductDetail } from '@/api/types';
 import { useAsyncResource } from '@/hooks/useAsyncResource';
 import { useActiveShop } from '@/store/shopStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatDate, formatNumber, toNumber } from '@/utils/format';
 
 export default function ProductDetailScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const params = useLocalSearchParams<{ id?: string }>();
   const productId = Number(params.id);
   const activeShop = useActiveShop();
@@ -65,18 +65,16 @@ export default function ProductDetailScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header
-          title={title || 'Product'}
-          subtitle={activeShop?.name}
-          showBack
-          actions={
-            shopId === null
-              ? []
-              : [{ icon: 'trash-outline', label: 'Delete product', onPress: () => setConfirming(true) }]
-          }
-        />
-      </View>
+      <Header
+        title={title || 'Product'}
+        subtitle={activeShop?.name}
+        showBack
+        actions={
+          shopId === null
+            ? []
+            : [{ icon: 'trash-outline', label: 'Delete product', onPress: () => setConfirming(true) }]
+        }
+      />
 
       {product.isLoading ? (
         <Loader label="Loading product…" full />
@@ -98,11 +96,11 @@ export default function ProductDetailScreen() {
           </Card>
         </View>
       ) : (
-        <View style={styles.body}>
-          <Card style={styles.heroCard}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <Card style={styles.heroCard} flat>
             <View style={styles.heroTop}>
               <View style={styles.heroIcon}>
-                <Ionicons name="cube" size={24} color={colors.textInverse} />
+                <Ionicons name="cube" size={24} color={colors.onPrimary} />
               </View>
               <View style={styles.heroText}>
                 <Text style={styles.heroTitle} numberOfLines={2}>
@@ -176,11 +174,11 @@ export default function ProductDetailScreen() {
           <Button
             label="Delete product"
             onPress={() => setConfirming(true)}
-            variant="secondary"
+            variant="danger"
             fullWidth
             icon="trash-outline"
           />
-        </View>
+        </ScrollView>
       )}
 
       <ConfirmDialog
@@ -197,11 +195,11 @@ export default function ProductDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   centered: { flex: 1, justifyContent: 'center', padding: spacing.lg },
-  body: { flex: 1 },
-  heroCard: { backgroundColor: colors.chrome, borderColor: colors.chrome, gap: spacing.lg },
+  content: { padding: spacing.lg, paddingBottom: spacing.giant, gap: spacing.md },
+  heroCard: { backgroundColor: c.chrome, borderColor: c.chrome, gap: spacing.lg },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   heroIcon: {
     width: 52,
@@ -209,20 +207,26 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: c.primary,
   },
   heroText: { flex: 1, gap: spacing.xs },
-  heroTitle: { ...typography.heading, color: colors.textInverse },
+  heroTitle: { ...typography.heading, color: '#FFFFFF' },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   priceBlock: { flex: 1, gap: 2 },
-  priceDivider: { width: 1, height: 34, backgroundColor: 'rgba(255,255,255,0.15)' },
-  priceLabel: { ...typography.caption, color: colors.chromeMuted },
-  priceValue: { ...typography.title, color: colors.textInverse },
-  detailRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md, paddingVertical: spacing.sm },
-  detailLabel: { ...typography.body, color: colors.textMuted, flexShrink: 1 },
-  detailValue: { ...typography.bodyStrong, color: colors.text },
-  positive: { color: colors.success },
-  separator: { height: 1, backgroundColor: colors.border },
+  priceDivider: { width: 1, height: 34, backgroundColor: 'rgba(255,255,255,0.18)' },
+  priceLabel: { ...typography.caption, color: 'rgba(255,255,255,0.65)' },
+  priceValue: { ...typography.title, color: '#FFFFFF' },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  detailLabel: { ...typography.body, color: c.textMuted, flexShrink: 1 },
+  detailValue: { ...typography.bodyStrong, color: c.text },
+  positive: { color: c.success },
+  separator: { height: 1, backgroundColor: c.border },
   alert: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -230,10 +234,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.warningTint,
+    backgroundColor: c.warningTint,
   },
-  alertText: { ...typography.label, color: colors.warning, flex: 1 },
+  alertText: { ...typography.label, color: c.warning, flex: 1 },
   notFound: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },
-  notFoundTitle: { ...typography.subheading, color: colors.text },
-  notFoundText: { ...typography.body, color: colors.textMuted, textAlign: 'center' },
-});
+  notFoundTitle: { ...typography.subheading, color: c.text },
+  notFoundText: { ...typography.body, color: c.textMuted, textAlign: 'center' },
+}));

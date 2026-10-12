@@ -1,17 +1,17 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
-import { ErrorView, Header, Loader, ShopForm } from '@/components/';
+import { ErrorView, Header, Loader, ShopForm, useToast } from '@/components/';
 import { fetchShop } from '@/api/shops';
 import type { ShopDetail } from '@/api/types';
 import { useAsyncResource } from '@/hooks/useAsyncResource';
 import { useShopStore } from '@/store/shopStore';
-import { colors, layout, spacing } from '@/theme';
+import { layout, makeStyles, spacing } from '@/theme';
 
 export default function EditShopScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const styles = useStyles();
+  const toast = useToast();
   const params = useLocalSearchParams<{ id?: string }>();
   const shopId = Number(params.id);
 
@@ -26,6 +26,7 @@ export default function EditShopScreen() {
 
   const onSubmit = async (payload: Parameters<typeof update>[1]) => {
     await update(shopId, payload);
+    toast.success('Shop updated');
     router.back();
   };
 
@@ -42,9 +43,7 @@ export default function EditShopScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header title="Edit shop" subtitle={shop.data?.name} showBack />
-      </View>
+      <Header title="Edit shop" subtitle={shop.data?.name} showBack />
 
       {shop.isLoading ? (
         <Loader label="Loading shop…" full />
@@ -80,9 +79,9 @@ export default function EditShopScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   flex: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', padding: layout.screenPadding },
   content: { padding: layout.screenPadding, paddingBottom: spacing.huge },
-});
+}));

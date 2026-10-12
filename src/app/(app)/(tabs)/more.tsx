@@ -1,17 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 
-import { Button, Card, Header, ListItem, ScreenScroll, Section } from '@/components/';
+import { Avatar, Button, Card, Header, ListItem, ScreenScroll, Section } from '@/components/';
 import { useActiveShop, useShopStore } from '@/store/shopStore';
 import { useAuthStore } from '@/store/authStore';
-import { colors, radius, spacing, typography } from '@/theme';
-import { initialsOf, joinLocation } from '@/utils/format';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
+import { joinLocation } from '@/utils/format';
 
 export default function MoreScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
 
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
@@ -41,15 +41,11 @@ export default function MoreScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header title="More" subtitle="Account and modules" />
-      </View>
+      <Header title="More" subtitle="Account and modules" />
 
       <ScreenScroll>
         <Card style={styles.profile}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initialsOf(user?.name ?? user?.username)}</Text>
-          </View>
+          <Avatar name={user?.name ?? user?.username} size={54} />
           <View style={styles.profileText}>
             <Text style={styles.profileName} numberOfLines={1}>
               {user?.name ?? user?.username ?? 'Signed in'}
@@ -118,21 +114,12 @@ export default function MoreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   profile: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-  },
-  avatarText: { ...typography.heading, color: colors.textInverse },
   profileText: { flex: 1, gap: 2 },
-  profileName: { ...typography.heading, color: colors.text },
-  profileMeta: { ...typography.caption, color: colors.textMuted },
+  profileName: { ...typography.heading, color: c.text },
+  profileMeta: { ...typography.caption, color: c.textMuted },
   list: { gap: spacing.sm },
   moduleIcon: {
     width: 40,
@@ -140,9 +127,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
+    backgroundColor: c.primaryTint,
   },
-  emptyShops: { ...typography.body, color: colors.textMuted, textAlign: 'center' },
+  emptyShops: { ...typography.body, color: c.textMuted, textAlign: 'center' },
   logout: { marginTop: spacing.md },
-  version: { ...typography.caption, color: colors.textDisabled, textAlign: 'center' },
-});
+  version: { ...typography.caption, color: c.textDisabled, textAlign: 'center' },
+}));

@@ -1,8 +1,9 @@
-import { Modal, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Modal, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { Button } from './Button';
-import { colors, elevation, radius, spacing, typography } from '@/theme';
+import { elevation, makeStyles, radius, spacing, typography, useReduceMotion, useTheme } from '@/theme';
 
 export interface ConfirmDialogProps {
   visible: boolean;
@@ -16,6 +17,40 @@ export interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
+const useStyles = makeStyles((c) => ({
+  backdrop: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+    backgroundColor: c.overlay,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 380,
+    alignItems: 'center',
+    gap: spacing.sm,
+    padding: spacing.xl,
+    borderRadius: radius.xl,
+    backgroundColor: c.surfaceElevated,
+    ...elevation.lg,
+  },
+  iconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: c.primaryTint,
+    marginBottom: spacing.xs,
+  },
+  iconWrapDanger: { backgroundColor: c.dangerTint },
+  title: { ...typography.heading, textAlign: 'center' },
+  message: { ...typography.body, textAlign: 'center' },
+  actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg, alignSelf: 'stretch' },
+  action: { flex: 1 },
+}));
+
 export function ConfirmDialog({
   visible,
   title,
@@ -27,19 +62,23 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const reduceMotion = useReduceMotion();
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel} statusBarTranslucent>
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onCancel} statusBarTranslucent>
+      <Animated.View entering={reduceMotion ? undefined : FadeIn.duration(180)} style={styles.backdrop}>
+        <Animated.View entering={reduceMotion ? undefined : FadeInDown.duration(240)} style={styles.card}>
           <View style={[styles.iconWrap, destructive && styles.iconWrapDanger]}>
             <Ionicons
               name={destructive ? 'trash-outline' : 'help-circle-outline'}
-              size={22}
+              size={24}
               color={destructive ? colors.danger : colors.primary}
             />
           </View>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          <Text style={[styles.message, { color: colors.textMuted }]}>{message}</Text>
           <View style={styles.actions}>
             <Button label={cancelLabel} onPress={onCancel} variant="secondary" style={styles.action} disabled={loading} />
             <Button
@@ -50,42 +89,8 @@ export function ConfirmDialog({
               loading={loading}
             />
           </View>
-        </View>
-      </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    backgroundColor: colors.overlay,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 380,
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.xl,
-    borderRadius: radius.lg,
-    backgroundColor: colors.background,
-    ...elevation.raised,
-  },
-  iconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
-    marginBottom: spacing.xs,
-  },
-  iconWrapDanger: { backgroundColor: colors.dangerTint },
-  title: { ...typography.heading, color: colors.text, textAlign: 'center' },
-  message: { ...typography.body, color: colors.textMuted, textAlign: 'center' },
-  actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.lg, alignSelf: 'stretch' },
-  action: { flex: 1 },
-});

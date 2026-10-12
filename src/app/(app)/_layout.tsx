@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useCompanyStore } from '@/store/companyStore';
 import { useShopStore } from '@/store/shopStore';
-import { colors } from '@/theme';
+import { useTheme } from '@/theme';
 
 /**
  * Guards the signed-in area. A user without a valid session is redirected to
@@ -17,6 +17,7 @@ export default function AppLayout() {
   const status = useAuthStore((state) => state.status);
   const shopsStatus = useShopStore((state) => state.status);
   const currencyStatus = useCompanyStore((state) => state.status);
+  const { colors } = useTheme();
 
   useEffect(() => {
     if (status !== 'authenticated') return;
@@ -42,9 +43,10 @@ export default function AppLayout() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: colors.background },
+        animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
       <Stack.Screen name="shops/create" options={{ presentation: 'modal' }} />
       <Stack.Screen name="shops/[id]/edit" options={{ presentation: 'card' }} />
       <Stack.Screen name="products/create" options={{ presentation: 'modal' }} />

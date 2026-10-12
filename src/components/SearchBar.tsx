@@ -1,8 +1,12 @@
-import { forwardRef, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { forwardRef, useState } from 'react';
+import { TextInput, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
+import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { colors, hitSize, radius, spacing, typography } from '@/theme';
+import { Touchable } from './Touchable';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
+
+const AnimatedView = Animated.View;
 
 export interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   value: string;
@@ -10,20 +14,35 @@ export interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   containerStyle?: StyleProp<ViewStyle>;
 }
 
+const useStyles = makeStyles((c) => ({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: 46,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    backgroundColor: c.surface,
+  },
+  input: { flex: 1, ...typography.body, color: c.text, paddingVertical: spacing.sm },
+}));
+
 export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBar(
   { value, onChangeText, placeholder = 'Search…', containerStyle, onFocus, onBlur, ...rest },
   ref,
 ) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [focused, setFocused] = useState(false);
+  const focusProgress = useSharedValue(0);
+
+  const animatedBorder = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(focusProgress.value, [0, 1], [colors.border, colors.primary]),
+  }));
 
   return (
-    <View
-      style={[
-        styles.container,
-        focused && styles.containerFocused,
-        containerStyle,
-      ]}
-    >
+    <AnimatedView style={[styles.container, animatedBorder, containerStyle]}>
       <Ionicons name="search" size={17} color={focused ? colors.primary : colors.textMuted} />
       <TextInput
         ref={ref}
@@ -36,44 +55,31 @@ export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBa
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
-        clearButtonMode="while-editing"
         style={styles.input}
         onFocus={(event) => {
           setFocused(true);
+          focusProgress.value = withTiming(1, { duration: 160 });
           onFocus?.(event);
         }}
         onBlur={(event) => {
           setFocused(false);
+          focusProgress.value = withTiming(0, { duration: 160 });
           onBlur?.(event);
         }}
         {...rest}
       />
       {value.length > 0 ? (
-        <Pressable
+        <Touchable
           accessibilityRole="button"
           accessibilityLabel="Clear search"
+          haptic="selection"
+          scaleTo={0.9}
           hitSlop={10}
           onPress={() => onChangeText('')}
         >
           <Ionicons name="close-circle" size={17} color={colors.textDisabled} />
-        </Pressable>
+        </Touchable>
       ) : null}
-    </View>
+    </AnimatedView>
   );
-});
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    minHeight: hitSize.control,
-    paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  containerFocused: { borderColor: colors.primary },
-  input: { flex: 1, ...typography.body, color: colors.text, paddingVertical: spacing.md },
 });

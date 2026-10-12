@@ -1,79 +1,105 @@
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, elevation, radius, spacing, typography } from '@/theme';
-import { Pressable } from 'react-native';
+import { Touchable } from './Touchable';
+import { elevation, makeStyles, radius, spacing, typography, useTheme, type ColorPalette } from '@/theme';
 
 export interface CardProps {
   children: React.ReactNode;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   padded?: boolean;
+  /** Removes the default shadow for cards nested inside another card. */
+  flat?: boolean;
 }
 
-export function Card({ children, onPress, style, padded = true }: CardProps) {
-  const content = (
-    <View style={[styles.card, padded && styles.padded, style]}>{children}</View>
-  );
+const useStyles = makeStyles(() => ({
+  card: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+  },
+  padded: { padding: spacing.lg },
+  shadow: { ...elevation.sm },
+}));
 
-  if (!onPress) return content;
+export function Card({ children, onPress, style, padded = true, flat = false }: CardProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
+  const composed: StyleProp<ViewStyle> = [
+    styles.card,
+    { backgroundColor: colors.surface, borderColor: colors.border },
+    !flat && styles.shadow,
+    padded && styles.padded,
+    style,
+  ];
+
+  if (!onPress) return <View style={composed}>{children}</View>;
 
   return (
-    <Pressable
+    <Touchable
       accessibilityRole="button"
+      haptic="light"
+      scaleTo={0.98}
       onPress={onPress}
-      style={({ pressed }) => [pressed && styles.pressed]}
+      style={composed}
     >
-      {content}
-    </Pressable>
+      {children}
+    </Touchable>
   );
 }
+
+export type BadgeTone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'accent' | 'info';
 
 export interface BadgeProps {
   label: string;
-  tone?: 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'accent';
+  tone?: BadgeTone;
   icon?: keyof typeof Ionicons.glyphMap;
 }
 
-const BADGE_TONE: Record<NonNullable<BadgeProps['tone']>, { bg: string; fg: string }> = {
-  neutral: { bg: colors.surfaceMuted, fg: colors.textSecondary },
-  primary: { bg: colors.primaryTint, fg: colors.primaryDarker },
-  success: { bg: colors.successTint, fg: colors.success },
-  warning: { bg: colors.warningTint, fg: colors.warning },
-  danger: { bg: colors.dangerTint, fg: colors.danger },
-  accent: { bg: colors.accentTint, fg: colors.accent },
+const badgePalette = (c: ColorPalette, tone: BadgeTone): { bg: string; fg: string } => {
+  switch (tone) {
+    case 'neutral':
+      return { bg: c.surfaceMuted, fg: c.textSecondary };
+    case 'primary':
+      return { bg: c.primaryTint, fg: c.primaryDarker };
+    case 'info':
+      return { bg: c.infoTint, fg: c.info };
+    case 'success':
+      return { bg: c.successTint, fg: c.successStrong };
+    case 'warning':
+      return { bg: c.warningTint, fg: c.warningStrong };
+    case 'danger':
+      return { bg: c.dangerTint, fg: c.dangerStrong };
+    case 'accent':
+      return { bg: c.accentTint, fg: c.accent };
+  }
 };
 
-export function Badge({ label, tone = 'neutral', icon }: BadgeProps) {
-  const palette = BADGE_TONE[tone];
-  return (
-    <View style={[styles.badge, { backgroundColor: palette.bg }]}>
-      {icon ? <Ionicons name={icon} size={11} color={palette.fg} /> : null}
-      <Text style={[styles.badgeText, { color: palette.fg }]} numberOfLines={1}>
-        {label}
-      </Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...elevation.card,
-  },
-  padded: { padding: spacing.lg },
-  pressed: { opacity: 0.9 },
+const useBadgeStyles = makeStyles(() => ({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xxs,
     alignSelf: 'flex-start',
     paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: radius.pill,
   },
-  badgeText: { ...typography.caption, fontWeight: '600' },
-});
+  text: { ...typography.caption, fontSize: 12, fontWeight: '600' },
+}));
+
+export function Badge({ label, tone = 'neutral', icon }: BadgeProps) {
+  const { colors } = useTheme();
+  const styles = useBadgeStyles();
+  const palette = badgePalette(colors, tone);
+
+  return (
+    <View style={[styles.badge, { backgroundColor: palette.bg }]}>
+      {icon ? <Ionicons name={icon} size={12} color={palette.fg} /> : null}
+      <Text style={[styles.text, { color: palette.fg }]} numberOfLines={1}>
+        {label}
+      </Text>
+    </View>
+  );
+}

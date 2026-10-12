@@ -1,7 +1,8 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ActivityIndicator, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, elevation, hitSize, radius, spacing, typography } from '@/theme';
+import { Touchable } from './Touchable';
+import { elevation, hitSize, makeStyles, radius, spacing, typography, useTheme, type ColorPalette } from '@/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -14,39 +15,59 @@ export interface ButtonProps {
   loading?: boolean;
   disabled?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
+  /** Icon rendered on the right, e.g. a chevron for "next" actions. */
+  trailingIcon?: keyof typeof Ionicons.glyphMap;
   style?: StyleProp<ViewStyle>;
   fullWidth?: boolean;
   accessibilityHint?: string;
 }
 
-const CONTAINER: Record<ButtonVariant, ViewStyle> = {
-  primary: { backgroundColor: colors.primary },
-  secondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong },
-  ghost: { backgroundColor: 'transparent' },
-  danger: { backgroundColor: colors.danger },
+const containerFor = (c: ColorPalette, variant: ButtonVariant): ViewStyle => {
+  switch (variant) {
+    case 'primary':
+      return { backgroundColor: c.primary };
+    case 'secondary':
+      return { backgroundColor: c.surface, borderColor: c.borderStrong };
+    case 'ghost':
+      return { backgroundColor: 'transparent', borderColor: 'transparent' };
+    case 'danger':
+      return { backgroundColor: c.danger };
+  }
 };
 
-const LABEL_COLOR: Record<ButtonVariant, string> = {
-  primary: colors.textInverse,
-  secondary: colors.text,
-  ghost: colors.primaryDark,
-  danger: colors.textInverse,
+const labelColorFor = (c: ColorPalette, variant: ButtonVariant): string => {
+  switch (variant) {
+    case 'primary':
+      return c.onPrimary;
+    case 'secondary':
+      return c.text;
+    case 'ghost':
+      return c.primary;
+    case 'danger':
+      return c.onDanger;
+  }
 };
 
-const ICON_COLOR: Record<ButtonVariant, string> = {
-  primary: colors.textInverse,
-  secondary: colors.textSecondary,
-  ghost: colors.primaryDark,
-  danger: colors.textInverse,
-};
+const SIZE_LABEL: Record<ButtonSize, number> = { sm: 13, md: 15, lg: 16 };
+const SIZE_ICON: Record<ButtonSize, number> = { sm: 16, md: 18, lg: 20 };
 
-const CONTAINER_SIZE: Record<ButtonSize, ViewStyle> = {
+const useStyles = makeStyles(() => ({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    borderWidth: 1,
+  },
   sm: { minHeight: hitSize.min, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
   md: { minHeight: hitSize.control, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   lg: { minHeight: 54, paddingHorizontal: spacing.xl, paddingVertical: spacing.lg },
-};
-
-const LABEL_SIZE: Record<ButtonSize, number> = { sm: 13, md: 15, lg: 16 };
+  primaryShadow: { ...elevation.sm },
+  content: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  label: { ...typography.button, textAlign: 'center' },
+  fullWidth: { alignSelf: 'stretch' },
+  disabled: { opacity: 0.5 },
+}));
 
 export function Button({
   label,
@@ -56,54 +77,46 @@ export function Button({
   loading = false,
   disabled = false,
   icon,
+  trailingIcon,
   style,
   fullWidth = false,
   accessibilityHint,
 }: ButtonProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const isInactive = disabled || loading;
+  const labelColor = labelColorFor(colors, variant);
 
   return (
-    <Pressable
+    <Touchable
       accessibilityRole="button"
-      accessibilityState={{ disabled: isInactive, busy: loading }}
+      accessibilityLabel={label}
       accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled: isInactive, busy: loading }}
       disabled={isInactive}
+      haptic={isInactive ? 'none' : 'light'}
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         styles.base,
-        CONTAINER_SIZE[size],
-        CONTAINER[variant],
-        variant === 'primary' && !isInactive && elevation.card,
-        fullWidth && styles.fullWidth,
+        styles[size],
+        containerFor(colors, variant),
+        variant === 'primary' && !isInactive ? styles.primaryShadow : null,
+        fullWidth ? styles.fullWidth : null,
+        isInactive ? styles.disabled : null,
         style,
-        pressed && !isInactive && styles.pressed,
-        isInactive && styles.disabled,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={ICON_COLOR[variant]} size="small" />
+        <ActivityIndicator color={labelColor} size="small" />
       ) : (
         <View style={styles.content}>
-          {icon ? <Ionicons name={icon} size={LABEL_SIZE[size] + 2} color={ICON_COLOR[variant]} /> : null}
-          <Text numberOfLines={1} style={[styles.label, { color: LABEL_COLOR[variant], fontSize: LABEL_SIZE[size] }]}>
+          {icon ? <Ionicons name={icon} size={SIZE_ICON[size]} color={labelColor} /> : null}
+          <Text numberOfLines={1} style={[styles.label, { color: labelColor, fontSize: SIZE_LABEL[size] }]}>
             {label}
           </Text>
-        </View>
+          {trailingIcon ? <Ionicons name={trailingIcon} size={SIZE_ICON[size]} color={labelColor} /> : null}
+      </View>
       )}
-    </Pressable>
+    </Touchable>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.md,
-  },
-  content: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  label: { ...typography.bodyStrong },
-  fullWidth: { alignSelf: 'stretch' },
-  pressed: { opacity: 0.85 },
-  disabled: { opacity: 0.55 },
-});

@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Button } from './Button';
 import { ApiError, isApiError } from '@/api/errors';
-import { colors, radius, spacing, typography } from '@/theme';
+import { elevation, makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 
 export interface ErrorViewProps {
   error: unknown;
@@ -11,6 +11,7 @@ export interface ErrorViewProps {
   retryLabel?: string;
   /** Compact inline variant for use inside a card or form. */
   compact?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
 const ICON_FOR_KIND: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -30,54 +31,21 @@ const ICON_FOR_KIND: Record<string, keyof typeof Ionicons.glyphMap> = {
 
 /** Extracts a message plus an optional technical detail line. */
 function describe(error: unknown): { message: string; detail?: string } {
-  if (isApiError(error)) {
-    return { message: error.message, detail: error.detail };
-  }
+  if (isApiError(error)) return { message: error.message, detail: error.detail };
   if (error instanceof Error) return { message: error.message };
   return { message: 'Something went wrong. Please try again.' };
 }
 
-export function ErrorView({ error, onRetry, retryLabel = 'Try again', compact = false }: ErrorViewProps) {
-  const { message, detail } = describe(error);
-  const icon = isApiError(error) ? ICON_FOR_KIND[error.kind] : 'warning-outline';
-  const isValidation = error instanceof ApiError && error.isValidation;
-
-  return (
-    <View style={[styles.container, compact && styles.compact]}>
-      <View style={styles.iconWrap}>
-        <Ionicons name={icon} size={compact ? 20 : 26} color={colors.danger} />
-      </View>
-      <View style={styles.textWrap}>
-        <Text style={styles.message}>{message}</Text>
-        {isValidation && Object.keys(error.fieldErrors).length > 0 ? (
-          <View style={styles.fieldList}>
-            {Object.entries(error.fieldErrors).map(([field, messages]) => (
-              <Text key={field} style={styles.fieldText}>
-                • {messages.join(', ')}
-              </Text>
-            ))}
-          </View>
-        ) : null}
-        {!compact && detail && detail !== message ? (
-          <Text style={styles.detail} numberOfLines={2}>
-            {detail}
-          </Text>
-        ) : null}
-      </View>
-      {onRetry ? <Button label={retryLabel} onPress={onRetry} variant="secondary" size="sm" icon="refresh" /> : null}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     alignItems: 'center',
     gap: spacing.md,
     padding: spacing.xl,
-    backgroundColor: colors.dangerTint,
+    backgroundColor: c.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: '#F3C6C6',
+    borderColor: c.border,
+    ...elevation.xs,
   },
   compact: {
     flexDirection: 'row',
@@ -86,16 +54,53 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   iconWrap: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: c.dangerTint,
   },
+  compactIconWrap: { width: 36, height: 36 },
   textWrap: { flex: 1, gap: spacing.xs, alignItems: 'center' },
-  message: { ...typography.bodyStrong, color: colors.danger, textAlign: 'center' },
+  compactTextWrap: { alignItems: 'flex-start' },
+  message: { ...typography.bodyStrong, textAlign: 'center' },
+  compactMessage: { textAlign: 'left' },
   fieldList: { gap: 2, alignSelf: 'stretch' },
-  fieldText: { ...typography.caption, color: colors.danger },
-  detail: { ...typography.caption, color: colors.textSecondary, textAlign: 'center' },
-});
+  fieldText: { ...typography.caption },
+  detail: { ...typography.caption, textAlign: 'center' },
+}));
+
+export function ErrorView({ error, onRetry, retryLabel = 'Try again', compact = false, style }: ErrorViewProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const { message, detail } = describe(error);
+  const icon = isApiError(error) ? ICON_FOR_KIND[error.kind] : 'warning-outline';
+  const isValidation = error instanceof ApiError && error.isValidation;
+
+  return (
+    <View style={[styles.container, compact && styles.compact, style]}>
+      <View style={[styles.iconWrap, compact && styles.compactIconWrap]}>
+        <Ionicons name={icon} size={compact ? 18 : 24} color={colors.danger} />
+      </View>
+      <View style={[styles.textWrap, compact && styles.compactTextWrap]}>
+        <Text style={[styles.message, { color: colors.text }, compact && styles.compactMessage]}>{message}</Text>
+        {isValidation && Object.keys(error.fieldErrors).length > 0 ? (
+          <View style={styles.fieldList}>
+            {Object.entries(error.fieldErrors).map(([field, messages]) => (
+              <Text key={field} style={[styles.fieldText, { color: colors.danger }]}>
+                • {messages.join(', ')}
+              </Text>
+            ))}
+          </View>
+        ) : null}
+        {!compact && detail && detail !== message ? (
+          <Text style={[styles.detail, { color: colors.textSecondary }]} numberOfLines={2}>
+            {detail}
+          </Text>
+        ) : null}
+      </View>
+      {onRetry ? <Button label={retryLabel} onPress={onRetry} variant="secondary" size="sm" icon="refresh" /> : null}
+    </View>
+  );
+}

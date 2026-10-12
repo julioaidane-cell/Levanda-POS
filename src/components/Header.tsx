@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ShopSwitcher } from './ShopSwitcher';
-import { colors, radius, spacing, typography } from '@/theme';
+import { Touchable } from './Touchable';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 
 export interface HeaderAction {
   icon: keyof typeof Ionicons.glyphMap;
@@ -21,7 +23,34 @@ export interface HeaderProps {
   onManageShops?: () => void;
   /** Hides the back chevron on root tab screens. */
   showBack?: boolean;
+  /** Adds the top safe-area inset. Disable when the parent already insets. */
+  inset?: boolean;
 }
+
+const useStyles = makeStyles((c) => ({
+  container: {
+    backgroundColor: c.chrome,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+    gap: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: c.chromeBorder,
+  },
+  topRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  brandMark: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: c.primary,
+  },
+  iconButton: { padding: spacing.xs },
+  titleWrap: { flex: 1, gap: 1 },
+  title: { ...typography.title, color: c.textInverse },
+  subtitle: { ...typography.caption, color: c.chromeMuted },
+  switcherRow: { flexDirection: 'row' },
+}));
 
 /**
  * Dark app bar matching the Levanda POS chrome. The back chevron is rendered
@@ -35,22 +64,28 @@ export function Header({
   onAddShop,
   onManageShops,
   showBack,
+  inset = true,
 }: HeaderProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+  const insets = useSafeAreaInsets();
   const canGoBack = showBack ?? router.canGoBack();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: (inset ? insets.top : 0) + spacing.md }]}>
       <View style={styles.topRow}>
         {canGoBack ? (
-          <Pressable
+          <Touchable
             accessibilityRole="button"
             accessibilityLabel="Go back"
-            onPress={() => router.back()}
+            haptic="light"
+            scaleTo={0.9}
             hitSlop={10}
-            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+            onPress={() => router.back()}
+            style={styles.iconButton}
           >
             <Ionicons name="chevron-back" size={22} color={colors.textInverse} />
-          </Pressable>
+          </Touchable>
         ) : (
           <View style={styles.brandMark}>
             <Ionicons name="storefront" size={15} color={colors.chrome} />
@@ -69,16 +104,18 @@ export function Header({
         </View>
 
         {actions?.map((action) => (
-          <Pressable
+          <Touchable
             key={action.label}
             accessibilityRole="button"
             accessibilityLabel={action.label}
-            onPress={action.onPress}
+            haptic="light"
+            scaleTo={0.9}
             hitSlop={8}
-            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+            onPress={action.onPress}
+            style={styles.iconButton}
           >
             <Ionicons name={action.icon} size={20} color={colors.textInverse} />
-          </Pressable>
+          </Touchable>
         ))}
       </View>
 
@@ -90,28 +127,3 @@ export function Header({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: colors.chrome,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-    gap: spacing.md,
-  },
-  topRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  brandMark: {
-    width: 32,
-    height: 32,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-  },
-  iconButton: { padding: spacing.xs },
-  pressed: { opacity: 0.6 },
-  titleWrap: { flex: 1, gap: 1 },
-  title: { ...typography.title, color: colors.textInverse },
-  subtitle: { ...typography.caption, color: colors.chromeMuted },
-  switcherRow: { flexDirection: 'row' },
-});

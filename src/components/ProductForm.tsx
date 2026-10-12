@@ -7,9 +7,9 @@ import { Button, ErrorView, Input, Section, Select } from '@/components/';
 import { isApiError } from '@/api/errors';
 import { fetchProductCategories } from '@/api/products';
 import type { ProductCategory, ProductPayload } from '@/api/types';
-import { colors, spacing, typography } from '@/theme';
+import { makeStyles, spacing, typography } from '@/theme';
 import { applyServerErrors } from '@/utils/formErrors';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useAsyncResource } from '@/hooks/useAsyncResource';
 import { useCompanyStore } from '@/store/companyStore';
 
@@ -53,6 +53,7 @@ export interface ProductFormProps {
 }
 
 export function ProductForm({ shopId, submitLabel, isSubmitting, bannerError, onSubmit, footer }: ProductFormProps) {
+  const styles = useStyles();
   const [showOptional, setShowOptional] = useState(false);
 
   // Categories are behind a per-company feature flag: `company.has_product_categories`
@@ -293,7 +294,7 @@ const categories = useAsyncResource<ProductCategory[] | null>(
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   form: { gap: spacing.lg },
-  note: { ...typography.caption, color: colors.textMuted },
-});
+  note: { ...typography.caption, color: c.textMuted },
+}));

@@ -6,7 +6,8 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "levanda",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#0A0A0A",
     "experiments": {
       "typedRoutes": true
     },
@@ -43,7 +44,19 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#00A8C0",
+          "dark": {
+            "backgroundColor": "#0B0E12"
+          }
+        }
+      ]
     ]
   }
 }

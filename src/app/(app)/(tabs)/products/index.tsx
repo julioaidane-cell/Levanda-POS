@@ -1,21 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 
-import { EmptyState, ErrorView, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
+import { EmptyState, ErrorView, FAB, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
 import { SkeletonList } from '@/components/Loader';
 import { fetchProducts } from '@/api/products';
 import type { ProductListPayload } from '@/api/types';
 import { useAsyncResource } from '@/hooks/useAsyncResource';
 import { useActiveShop, useShopStore } from '@/store/shopStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, useTheme } from '@/theme';
 import { formatCurrency, formatNumber } from '@/utils/format';
 
 export default function ProductsListScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
 
   const activeShop = useActiveShop();
   const refreshShops = useShopStore((state) => state.refresh);
@@ -46,20 +46,18 @@ export default function ProductsListScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header
-          title="Products"
-          subtitle={activeShop?.name ?? 'No active shop'}
-          showShopSwitcher
-          onAddShop={() => router.push('/shops/create')}
-          onManageShops={() => router.push('/shops')}
-          actions={
-            activeShopId === null
-              ? []
-              : [{ icon: 'add', label: 'Add product', onPress: () => router.push('/products/create') }]
-          }
-        />
-      </View>
+      <Header
+        title="Products"
+        subtitle={activeShop?.name ?? 'No active shop'}
+        showShopSwitcher
+        onAddShop={() => router.push('/shops/create')}
+        onManageShops={() => router.push('/shops')}
+        actions={
+          activeShopId === null
+            ? []
+            : [{ icon: 'add', label: 'Add product', onPress: () => router.push('/products/create') }]
+        }
+      />
 
       <ScreenScroll onRefresh={onRefresh} refreshing={products.isRefreshing}>
         {activeShopId === null && shopsLoaded ? (
@@ -81,12 +79,12 @@ export default function ProductsListScreen() {
                 label="Products"
                 value={products.isLoading ? '—' : formatNumber(products.data?.total_available_products ?? 0)}
                 tone="primary"
-                icon={<Ionicons name="cube-outline" size={13} color={colors.primary} />}
+                icon={<Ionicons name="cube-outline" size={16} color={colors.primary} />}
               />
               <StatTile
                 label="Units in stock"
                 value={products.isLoading ? '—' : formatNumber(products.data?.total_quantity ?? 0)}
-                icon={<Ionicons name="layers-outline" size={13} color={colors.textMuted} />}
+                icon={<Ionicons name="layers-outline" size={16} color={colors.textSecondary} />}
               />
             </View>
 
@@ -131,14 +129,12 @@ export default function ProductsListScreen() {
               </Section>
             )}
 
-            <Pressable
-              accessibilityRole="button"
+            <FAB
+              icon="add"
+              label="Add product"
+              accessibilityLabel="Add product"
               onPress={() => router.push('/products/create')}
-              style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
-            >
-              <Ionicons name="add" size={22} color={colors.textInverse} />
-              <Text style={styles.fabText}>Add product</Text>
-            </Pressable>
+            />
           </>
         ) : null}
       </ScreenScroll>
@@ -146,8 +142,8 @@ export default function ProductsListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   tileRow: { flexDirection: 'row', gap: spacing.md },
   list: { gap: spacing.sm },
   icon: {
@@ -156,18 +152,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
+    backgroundColor: c.primaryTint,
   },
-  fab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.md,
-    minHeight: 52,
-    borderRadius: radius.md,
-    backgroundColor: colors.primary,
-  },
-  fabPressed: { opacity: 0.85 },
-  fabText: { ...typography.bodyStrong, color: colors.textInverse },
-});
+}));

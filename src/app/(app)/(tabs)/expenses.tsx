@@ -1,23 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ScrollView, Text, View } from 'react-native';
 
-import { Badge, EmptyState, Header, ListItem, ScreenScroll, Section, Select, StatTile } from '@/components/';
+import { Badge, Chip, EmptyState, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
 import { mockExpenses } from '@/data/mock/expenses';
 import type { ExpenseCategory } from '@/types/modules';
 import { useActiveShop } from '@/store/shopStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatDate } from '@/utils/format';
 
-const ALL: 'All' | ExpenseCategory = 'All';
+const ALL = -1;
 
 export default function ExpensesScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const activeShop = useActiveShop();
-  const [category, setCategory] = useState<number>(ALL === 'All' ? -1 : 0);
+  const [category, setCategory] = useState<number>(ALL);
 
   const categories = useMemo<ExpenseCategory[]>(
     () => ['Rent', 'Utilities', 'Salaries', 'Transport', 'Maintenance', 'Marketing', 'Other'],
@@ -25,7 +25,7 @@ export default function ExpensesScreen() {
   );
 
   const filtered = useMemo(
-    () => (category === -1 ? mockExpenses : mockExpenses.filter((expense) => expense.category === categories[category])),
+    () => (category === ALL ? mockExpenses : mockExpenses.filter((expense) => expense.category === categories[category])),
     [category, categories],
   );
 
@@ -37,15 +37,13 @@ export default function ExpensesScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header
-          title="Expenses"
-          subtitle={activeShop?.name ?? 'All shops'}
-          showShopSwitcher
-          onAddShop={() => router.push('/shops/create')}
-          onManageShops={() => router.push('/shops')}
-        />
-      </View>
+      <Header
+        title="Expenses"
+        subtitle={activeShop?.name ?? 'All shops'}
+        showShopSwitcher
+        onAddShop={() => router.push('/shops/create')}
+        onManageShops={() => router.push('/shops')}
+      />
 
       <ScreenScroll onRefresh={onRefresh}>
         <View style={styles.tileRow}>
@@ -53,22 +51,26 @@ export default function ExpensesScreen() {
             label="Total expenses"
             value={formatCurrency(total)}
             tone="danger"
-            icon={<Ionicons name="receipt-outline" size={13} color={colors.danger} />}
+            icon={<Ionicons name="receipt-outline" size={16} color={colors.danger} />}
           />
           <StatTile
             label="Entries"
             value={String(filtered.length)}
-            icon={<Ionicons name="list-outline" size={13} color={colors.textMuted} />}
+            icon={<Ionicons name="list-outline" size={16} color={colors.textSecondary} />}
           />
         </View>
 
-        <Select
-          label="Filter by category"
-          value={category === -1 ? null : category}
-          placeholder="All categories"
-          options={[{ label: 'All categories', value: -1 }, ...categories.map((name, index) => ({ label: name, value: index }))]}
-          onChange={setCategory}
-        />
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filters}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Chip label="All" active={category === ALL} onPress={() => setCategory(ALL)} />
+          {categories.map((name, index) => (
+            <Chip key={name} label={name} active={category === index} onPress={() => setCategory(index)} />
+          ))}
+        </ScrollView>
 
         {filtered.length === 0 ? (
           <EmptyState
@@ -108,9 +110,10 @@ export default function ExpensesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   tileRow: { flexDirection: 'row', gap: spacing.md },
+  filters: { gap: spacing.sm, paddingVertical: spacing.xxs },
   list: { gap: spacing.sm },
   icon: {
     width: 40,
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.warningTint,
+    backgroundColor: c.warningTint,
   },
   notice: {
     flexDirection: 'row',
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: c.surfaceMuted,
   },
-  noticeText: { ...typography.caption, color: colors.textMuted, flex: 1 },
-});
+  noticeText: { ...typography.caption, color: c.textMuted, flex: 1 },
+}));

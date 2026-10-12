@@ -214,17 +214,54 @@ the user, and the country supplies the phone dialling code.
 
 ## Design system
 
-Tokens live in `src/theme` and are the single source of colour, spacing, radius
-and typography. Screens compose reusable components (`src/components`) rather
-than restyling: `Button`, `Input`, `Select`, `SearchBar`, `Card`, `Badge`,
-`ListItem`, `Header`, `ShopSwitcher`, `Screen`/`ScreenScroll`, `Section`,
+Tokens live in `src/theme` and are the single source of colour, spacing, radius,
+elevation, motion and typography. Nothing outside `src/theme` hard-codes a
+colour or a spacing value.
+
+### Theming
+
+- **Two palettes, one token set.** `lightColors` (the sampled Levanda web
+  palette) and `darkColors` share identical keys, so every screen themes at
+  runtime. `app.json` sets `userInterfaceStyle: "automatic"`, and
+  `ThemeProvider` reads the OS scheme via `useColorScheme`.
+- **`makeStyles`** memoises a style sheet per palette and returns a `useStyles()`
+  hook. Because the palettes are stable module constants, each sheet is built
+  once and reused across light/dark:
+
+  ```ts
+  const useStyles = makeStyles((c) => ({ card: { backgroundColor: c.surface } }));
+  // inside the component
+  const styles = useStyles();
+  ```
+
+- `useTheme().colors` is the palette for anything not expressible as a static
+  style (icon tints, gradients, inline animated colours). The legacy static
+  `colors` export remains only for module-scope constants.
+- **Typography** uses Inter (400–800), loaded in the root layout behind the
+  native splash so text never flashes the platform font. The `typography`
+  variants (`display`/`title`/`heading`/`subheading`/`body`/`label`/`caption`/
+  `overline`/`button`) bundle family, size, weight and line height.
+
+### Motion and feedback
+
+- `Touchable` is the single tappable primitive: a springy press-scale plus a
+  haptic tap (`src/utils/haptics.ts`), used by every button, row and card.
+- All animation honours the OS "Reduce Motion" setting via `useReduceMotion()`.
+- `Loader`/`Skeleton`/`SkeletonList`/`SkeletonStats` render shimmering
+  placeholders shaped like the real content.
+- `ToastProvider` + `useToast()` surface success/error messages after create,
+  update and delete actions.
+
+### Component library
+
+Screens compose reusable components from `src/components` rather than
+restyling: `Button`, `Touchable`, `Input` (animated focus, password toggle),
+`Select` (animated searchable bottom sheet), `SearchBar`, `Card`/`Badge`,
+`Avatar`, `Chip`, `Divider`, `ListItem`, `Header` (safe-area aware),
+`ShopSwitcher`, `FAB`, `Screen`/`ScreenScroll`, `Section`/`SectionHeader`,
 `StatTile`, `Loader`/`Skeleton`, `EmptyState`, `ErrorView`, `ConfirmDialog`,
 `ShopForm`, `ProductForm`.
 
 Every screen provides loading (skeleton), empty and error-with-retry states;
 empty states are only shown once a load has actually succeeded, so they never
 flash while a request is in flight.
-
-The palette (teal `#00A8C0` on near-black chrome) was sampled from the supplied
-screenshots, and the platform system font is used so text renders natively on
-both platforms.

@@ -1,15 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 
-import { Badge, EmptyState, Header, ListItem, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
+import { Avatar, Badge, EmptyState, Header, ListItem, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
 import { mockSuppliers } from '@/data/mock/suppliers';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatNumber } from '@/utils/format';
 
 export default function SuppliersScreen() {
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
@@ -31,9 +31,7 @@ export default function SuppliersScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header title="Suppliers" subtitle="Local sample data" showBack />
-      </View>
+      <Header title="Suppliers" subtitle="Local sample data" showBack />
 
       <ScreenScroll>
         <View style={styles.tileRow}>
@@ -41,12 +39,12 @@ export default function SuppliersScreen() {
             label="Suppliers"
             value={formatNumber(totals.count)}
             tone="primary"
-            icon={<Ionicons name="bus-outline" size={13} color={colors.primary} />}
+            icon={<Ionicons name="bus-outline" size={16} color={colors.primary} />}
           />
           <StatTile
             label="Total purchases"
             value={formatCurrency(totals.purchases)}
-            icon={<Ionicons name="cash-outline" size={13} color={colors.textMuted} />}
+            icon={<Ionicons name="cash-outline" size={16} color={colors.textSecondary} />}
           />
         </View>
 
@@ -68,11 +66,7 @@ export default function SuppliersScreen() {
                   subtitle={`${supplier.contactPerson} · ${supplier.phone}`}
                   meta={formatCurrency(supplier.totalPurchases)}
                   badge={{ label: supplier.status, tone: supplier.status === 'Active' ? 'success' : 'warning' }}
-                  leading={
-                    <View style={styles.icon}>
-                      <Ionicons name="bus-outline" size={17} color={colors.primaryDark} />
-                    </View>
-                  }
+                  leading={<Avatar name={supplier.name} shape="square" size={40} />}
                 />
               ))}
             </View>
@@ -90,18 +84,10 @@ export default function SuppliersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   tileRow: { flexDirection: 'row', gap: spacing.md },
   list: { gap: spacing.sm },
-  icon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
-  },
   notice: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -109,7 +95,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: c.surfaceMuted,
   },
-  noticeText: { ...typography.caption, color: colors.textMuted, flex: 1 },
-});
+  noticeText: { ...typography.caption, color: c.textMuted, flex: 1 },
+}));

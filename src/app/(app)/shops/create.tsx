@@ -1,28 +1,27 @@
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
-import { Header, ShopForm } from '@/components/';
+import { Header, ShopForm, useToast } from '@/components/';
 import { useShopStore } from '@/store/shopStore';
-import { colors, layout, spacing } from '@/theme';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { layout, makeStyles, spacing } from '@/theme';
 
 export default function CreateShopScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const styles = useStyles();
+  const toast = useToast();
   const create = useShopStore((state) => state.create);
   const isSubmitting = useShopStore((state) => state.isSubmitting);
   const error = useShopStore((state) => state.error);
 
   const onSubmit = async (payload: Parameters<typeof create>[0]) => {
     await create(payload);
+    toast.success('Shop created');
     router.back();
   };
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header title="New shop" subtitle="Add a branch or a new location" showBack />
-      </View>
+      <Header title="New shop" subtitle="Add a branch or a new location" showBack />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
           style={styles.flex}
@@ -43,8 +42,8 @@ export default function CreateShopScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   flex: { flex: 1 },
   content: { padding: layout.screenPadding, paddingBottom: spacing.huge },
-});
+}));

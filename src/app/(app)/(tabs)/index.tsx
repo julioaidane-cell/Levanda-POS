@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 
 import { Badge, Card, EmptyState, ErrorView, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
 import { fetchProducts } from '@/api/products';
@@ -10,12 +9,13 @@ import type { ProductListPayload } from '@/api/types';
 import { useAsyncResource } from '@/hooks/useAsyncResource';
 import { SkeletonList } from '@/components/Loader';
 import { useActiveShop, useShopStore } from '@/store/shopStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatNumber } from '@/utils/format';
 
 export default function DashboardScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
 
   const activeShop = useActiveShop();
   const shops = useShopStore((state) => state.shops);
@@ -64,16 +64,14 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header
-          title="Dashboard"
-          subtitle={activeShop?.name ?? 'No active shop'}
-          showShopSwitcher
-          onAddShop={addShop}
-          onManageShops={manageShops}
-          actions={[{ icon: 'log-out-outline', label: 'Log out', onPress: () => router.push('/more') }]}
-        />
-      </View>
+      <Header
+        title="Dashboard"
+        subtitle={activeShop?.name ?? 'No active shop'}
+        showShopSwitcher
+        onAddShop={addShop}
+        onManageShops={manageShops}
+        actions={[{ icon: 'log-out-outline', label: 'Log out', onPress: () => router.push('/more') }]}
+      />
 
       <ScreenScroll onRefresh={onRefresh} refreshing={products.isRefreshing}>
         {shopsStatus === 'loading' && shops.length === 0 ? <SkeletonList count={3} /> : null}
@@ -104,12 +102,12 @@ export default function DashboardScreen() {
                 label="Shops"
                 value={formatNumber(shops.length)}
                 tone="primary"
-                icon={<Ionicons name="storefront-outline" size={13} color={colors.primary} />}
+                icon={<Ionicons name="storefront-outline" size={16} color={colors.primary} />}
               />
               <StatTile
                 label="Products"
                 value={products.isLoading ? '—' : formatNumber(products.data?.total_available_products ?? 0)}
-                icon={<Ionicons name="cube-outline" size={13} color={colors.textMuted} />}
+                icon={<Ionicons name="cube-outline" size={16} color={colors.textSecondary} />}
               />
             </View>
             <View style={styles.tileRow}>
@@ -117,33 +115,31 @@ export default function DashboardScreen() {
                 label="Stock on hand"
                 value={products.isLoading ? '—' : formatNumber(products.data?.total_quantity ?? 0)}
                 tone="success"
-                icon={<Ionicons name="layers-outline" size={13} color={colors.success} />}
+                icon={<Ionicons name="layers-outline" size={16} color={colors.success} />}
               />
               <StatTile
                 label="Retail value"
                 value={products.isLoading ? '—' : formatCurrency(stockValue)}
                 tone="warning"
-                icon={<Ionicons name="cash-outline" size={13} color={colors.warning} />}
+                icon={<Ionicons name="cash-outline" size={16} color={colors.warning} />}
               />
             </View>
 
             {lowStock.length > 0 ? (
               <Section title="Needs attention">
-                <Card>
-                  <View style={styles.alertRow}>
+                <View style={styles.alert}>
+                  <View style={styles.alertIcon}>
                     <Ionicons name="warning-outline" size={18} color={colors.warning} />
-                    <Text style={styles.alertText}>
-                      {lowStock.length} product{lowStock.length === 1 ? '' : 's'} at or below the minimum stock level.
-                    </Text>
                   </View>
-                </Card>
+                  <Text style={styles.alertText}>
+                    {lowStock.length} product{lowStock.length === 1 ? '' : 's'} at or below the minimum stock level.
+                  </Text>
+                  <Ionicons name="chevron-forward" size={16} color={colors.textDisabled} />
+                </View>
               </Section>
             ) : null}
 
-            <Section
-              title="Recently added"
-              caption="Newest products in the active shop."
-            >
+            <Section title="Recently added" caption="Newest products in the active shop.">
               {products.isLoading ? (
                 <SkeletonList count={3} />
               ) : products.error ? (
@@ -183,12 +179,16 @@ export default function DashboardScreen() {
             <Section title="Quick actions">
               <View style={styles.actionRow}>
                 <Card onPress={addShop} style={styles.actionCard}>
-                  <Ionicons name="add-circle-outline" size={22} color={colors.primary} />
+                  <View style={[styles.actionIcon, { backgroundColor: colors.primaryTint }]}>
+                    <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
+                  </View>
                   <Text style={styles.actionLabel}>New shop</Text>
                   <Badge label="Manage" tone="neutral" />
                 </Card>
                 <Card onPress={() => router.push('/products/create')} style={styles.actionCard}>
-                  <Ionicons name="cube-outline" size={22} color={colors.primary} />
+                  <View style={[styles.actionIcon, { backgroundColor: colors.primaryTint }]}>
+                    <Ionicons name="cube-outline" size={20} color={colors.primary} />
+                  </View>
                   <Text style={styles.actionLabel}>New product</Text>
                   <Badge label="Inventory" tone="neutral" />
                 </Card>
@@ -201,8 +201,8 @@ export default function DashboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   tileRow: { flexDirection: 'row', gap: spacing.md },
   list: { gap: spacing.sm },
   productIcon: {
@@ -211,11 +211,29 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
+    backgroundColor: c.primaryTint,
   },
-  alertRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  alertText: { ...typography.body, color: colors.text, flex: 1 },
+  alert: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    backgroundColor: c.warningTint,
+    borderWidth: 1,
+    borderColor: c.warningTint,
+  },
+  alertIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: c.surface,
+  },
+  alertText: { ...typography.body, color: c.text, flex: 1 },
   actionRow: { flexDirection: 'row', gap: spacing.md },
   actionCard: { flex: 1, gap: spacing.sm },
-  actionLabel: { ...typography.subheading, color: colors.text },
-});
+  actionIcon: { width: 40, height: 40, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  actionLabel: { ...typography.subheading, color: c.text },
+}));

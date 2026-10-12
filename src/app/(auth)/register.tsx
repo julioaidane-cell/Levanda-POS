@@ -1,19 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Controller, useController, useForm } from 'react-hook-form';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { z } from 'zod';
 
-import { Button, ErrorView, Input, Section, Select } from '@/components/';
+import { Button, Chip, ErrorView, Input, Section, Select } from '@/components/';
 import type { RegisterPayload } from '@/api/types';
 import { isApiError } from '@/api/errors';
 import { useLocationChain } from '@/hooks/useLocationChain';
 import { useAuthStore } from '@/store/authStore';
 import { useShopStore } from '@/store/shopStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, primaryScale, radius, spacing, typography, useTheme } from '@/theme';
 import { applyServerErrors } from '@/utils/formErrors';
 
 /** The assignment fixes the account type to a shop registration. */
@@ -64,6 +64,8 @@ function toLocationIds(values: RegisterValues): Pick<RegisterPayload, 'country_i
 
 export default function RegisterScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const registerAccount = useAuthStore((state) => state.register);
   const isSubmitting = useAuthStore((state) => state.isSubmitting);
   const bannerError = useAuthStore((state) => state.error);
@@ -71,7 +73,6 @@ export default function RegisterScreen() {
   const adoptShop = useShopStore((state) => state.adoptShop);
 
   const location = useLocationChain();
-  const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, setError, watch } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -128,262 +129,276 @@ export default function RegisterScreen() {
   const phoneValue = watch('phone');
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView
-        style={styles.flex}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.lg }]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-      >
-        <View style={styles.hero}>
-          <Text style={styles.brand}>Create your account</Text>
-          <Text style={styles.heroSubtitle}>
-            Register your business to start selling with Levanda POS.
-          </Text>
-        </View>
-
-        <View style={styles.accountType}>
-          <Ionicons name="storefront-outline" size={16} color={colors.primaryDark} />
-          <Text style={styles.accountTypeText}>Account type: Shop</Text>
-        </View>
-
-        {showBanner && bannerError ? <ErrorView error={bannerError} compact /> : null}
-        {location.error ? <ErrorView error={new Error(location.error)} compact retryLabel="Retry" onRetry={location.retry} /> : null}
-
-        <Section title="Business" inCard>
-          <Controller
-            control={control}
-            name="business_name"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                label="Business name"
-                icon="business-outline"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={fieldState.error?.message}
-                placeholder="e.g. Kanzu Mini Mart"
-                required
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="business_location"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                label="Business location"
-                icon="location-outline"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={fieldState.error?.message}
-                placeholder="Street, landmark"
-                required
-              />
-            )}
-          />
-        </Section>
-
-        <Section title="Sign-in details" inCard>
-          <Controller
-            control={control}
-            name="username"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                label="Username"
-                icon="person-outline"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={fieldState.error?.message}
-                autoCapitalize="none"
-                autoCorrect={false}
-                required
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <View>
-                <Input
-                  label="Password"
-                  icon="lock-closed-outline"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={fieldState.error?.message}
-                  secureTextEntry={!showPassword}
-                  required
-                />
-                <Pressable
-                  onPress={() => setShowPassword((current) => !current)}
-                  hitSlop={10}
-                  style={styles.reveal}
-                  accessibilityRole="button"
-                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.textMuted} />
-                </Pressable>
+    <View style={styles.root}>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          <LinearGradient
+            colors={[primaryScale[800], colors.chrome]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.hero, { paddingTop: insets.top + spacing.xxl }]}
+          >
+            <View style={styles.brandRow}>
+              <View style={styles.brandMark}>
+                <Ionicons name="storefront" size={18} color={colors.onPrimary} />
               </View>
-            )}
-          />
-          <Controller
-            control={control}
-            name="confirmPassword"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                label="Confirm password"
-                icon="shield-checkmark-outline"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={fieldState.error?.message}
-                secureTextEntry={!showPassword}
-                required
-              />
-            )}
-          />
-        </Section>
-
-        <Section title="Contact" inCard>
-          <View style={styles.phoneRow}>
-            <View style={styles.phoneCodeBox}>
-              <Text style={styles.phoneCodeLabel}>Code</Text>
-              <Text style={styles.phoneCodeValue}>{phonecode || '—'}</Text>
+              <Text style={styles.brand}>Levanda POS</Text>
             </View>
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field: { onChange, onBlur, value }, fieldState }) => (
-                <Input
-                  containerStyle={styles.phoneInput}
-                  label="Phone number"
-                  icon="call-outline"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={fieldState.error?.message}
-                  keyboardType="phone-pad"
-                  placeholder={phonecode ? 'e.g. 755123456' : 'Select a country first'}
-                  editable={phonecode.length > 0}
-                  required
+            <Text style={styles.heroTitle}>Create your account</Text>
+            <Text style={styles.heroSubtitle}>
+              Register your business to start selling with Levanda POS.
+            </Text>
+          </LinearGradient>
+
+          <View style={styles.form}>
+            <Chip label="Account type: Shop" icon="storefront-outline" active />
+
+            {showBanner && bannerError ? <ErrorView error={bannerError} compact /> : null}
+            {location.error ? (
+              <ErrorView error={new Error(location.error)} compact retryLabel="Retry" onRetry={location.retry} />
+            ) : null}
+
+            <Section title="Business" inCard>
+              <Controller
+                control={control}
+                name="business_name"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Business name"
+                    icon="business-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    placeholder="e.g. Kanzu Mini Mart"
+                    required
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="business_location"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Business location"
+                    icon="location-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    placeholder="Street, landmark"
+                    required
+                  />
+                )}
+              />
+            </Section>
+
+            <Section title="Sign-in details" inCard>
+              <Controller
+                control={control}
+                name="username"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Username"
+                    icon="person-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    required
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Password"
+                    icon="lock-closed-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    secureTextEntry
+                    required
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Confirm password"
+                    icon="shield-checkmark-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    secureTextEntry
+                    required
+                  />
+                )}
+              />
+            </Section>
+
+            <Section title="Contact" inCard>
+              <View style={styles.phoneRow}>
+                <View style={styles.phoneCodeBox}>
+                  <Text style={styles.phoneCodeLabel}>Code</Text>
+                  <Text style={styles.phoneCodeValue}>{phonecode || '—'}</Text>
+                </View>
+                <Controller
+                  control={control}
+                  name="phone"
+                  render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                    <Input
+                      containerStyle={styles.phoneInput}
+                      label="Phone number"
+                      icon="call-outline"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      error={fieldState.error?.message}
+                      keyboardType="phone-pad"
+                      placeholder={phonecode ? 'e.g. 755123456' : 'Select a country first'}
+                      editable={phonecode.length > 0}
+                      required
+                    />
+                  )}
                 />
-              )}
+              </View>
+              {phoneValue.length > 0 && phonecode.length > 0 ? (
+                <Text style={styles.phonePreview}>
+                  {phonecode}
+                  {phoneValue}
+                </Text>
+              ) : null}
+            </Section>
+
+            <Section title="Location" caption="Used for reporting and tax regions." inCard>
+              <Select
+                label="Country"
+                required
+                searchable
+                placeholder="Select country"
+                value={location.countryId}
+                loading={location.isLoadingCountries}
+                error={countryField.fieldState.error?.message}
+                options={location.countries.map((country) => ({
+                  label: country.name,
+                  value: country.id,
+                  meta: `+${country.dial_code}`,
+                }))}
+                onChange={(id) => {
+                  location.setCountry(id);
+                  countryField.field.onChange(id);
+                }}
+              />
+              <Select
+                label="Region"
+                required
+                searchable
+                placeholder={location.countryId === null ? 'Select a country first' : 'Select region'}
+                disabled={location.countryId === null}
+                value={location.regionId}
+                loading={location.isLoadingRegions}
+                error={regionField.fieldState.error?.message}
+                options={location.regions.map((region) => ({ label: region.name, value: region.id }))}
+                onChange={(id) => {
+                  location.setRegion(id);
+                  regionField.field.onChange(id);
+                }}
+              />
+              <Select
+                label="District"
+                required
+                searchable
+                placeholder={location.regionId === null ? 'Select a region first' : 'Select district'}
+                disabled={location.regionId === null}
+                value={location.districtId}
+                loading={location.isLoadingDistricts}
+                error={districtField.fieldState.error?.message}
+                options={location.districts.map((district) => ({ label: district.name, value: district.id }))}
+                onChange={(id) => {
+                  location.setDistrict(id);
+                  districtField.field.onChange(id);
+                }}
+              />
+              <Select
+                label="Ward"
+                required
+                searchable
+                placeholder={location.districtId === null ? 'Select a district first' : 'Select ward'}
+                disabled={location.districtId === null}
+                value={location.wardId}
+                loading={location.isLoadingWards}
+                error={wardField.fieldState.error?.message}
+                options={location.wards.map((ward) => ({ label: ward.name, value: ward.id }))}
+                onChange={(id) => {
+                  location.setWard(id);
+                  wardField.field.onChange(id);
+                }}
+              />
+            </Section>
+
+            <Button
+              label="Create account"
+              onPress={onSubmit}
+              loading={isSubmitting}
+              size="lg"
+              fullWidth
+              icon="checkmark-circle-outline"
             />
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already registered? </Text>
+              <Link href="/(auth)/login" asChild>
+                <Pressable accessibilityRole="link" hitSlop={8}>
+                  <Text style={styles.footerLink}>Sign in</Text>
+                </Pressable>
+              </Link>
+            </View>
           </View>
-          {phoneValue.length > 0 && phonecode.length > 0 ? (
-            <Text style={styles.phonePreview}>{phonecode}{phoneValue}</Text>
-          ) : null}
-        </Section>
-
-        <Section title="Location" caption="Used for reporting and tax regions." inCard>
-          <Select
-            label="Country"
-            required
-            searchable
-            placeholder="Select country"
-            value={location.countryId}
-            loading={location.isLoadingCountries}
-            error={countryField.fieldState.error?.message}
-            options={location.countries.map((country) => ({
-              label: country.name,
-              value: country.id,
-              meta: `+${country.dial_code}`,
-            }))}
-            onChange={(id) => {
-              location.setCountry(id);
-              countryField.field.onChange(id);
-            }}
-          />
-          <Select
-            label="Region"
-            required
-            searchable
-            placeholder={location.countryId === null ? 'Select a country first' : 'Select region'}
-            disabled={location.countryId === null}
-            value={location.regionId}
-            loading={location.isLoadingRegions}
-            error={regionField.fieldState.error?.message}
-            options={location.regions.map((region) => ({ label: region.name, value: region.id }))}
-            onChange={(id) => {
-              location.setRegion(id);
-              regionField.field.onChange(id);
-            }}
-          />
-          <Select
-            label="District"
-            required
-            searchable
-            placeholder={location.regionId === null ? 'Select a region first' : 'Select district'}
-            disabled={location.regionId === null}
-            value={location.districtId}
-            loading={location.isLoadingDistricts}
-            error={districtField.fieldState.error?.message}
-            options={location.districts.map((district) => ({ label: district.name, value: district.id }))}
-            onChange={(id) => {
-              location.setDistrict(id);
-              districtField.field.onChange(id);
-            }}
-          />
-          <Select
-            label="Ward"
-            required
-            searchable
-            placeholder={location.districtId === null ? 'Select a district first' : 'Select ward'}
-            disabled={location.districtId === null}
-            value={location.wardId}
-            loading={location.isLoadingWards}
-            error={wardField.fieldState.error?.message}
-            options={location.wards.map((ward) => ({ label: ward.name, value: ward.id }))}
-            onChange={(id) => {
-              location.setWard(id);
-              wardField.field.onChange(id);
-            }}
-          />
-        </Section>
-
-        <Button
-          label="Create account"
-          onPress={onSubmit}
-          loading={isSubmitting}
-          size="lg"
-          fullWidth
-          icon="checkmark-circle-outline"
-        />
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already registered? </Text>
-          <Link href="/(auth)/login" asChild>
-            <Pressable accessibilityRole="link" hitSlop={8}>
-              <Text style={styles.footerLink}>Sign in</Text>
-            </Pressable>
-          </Link>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.huge, gap: spacing.lg },
-  hero: { gap: spacing.xs, paddingBottom: spacing.xs },
-  brand: { ...typography.display, color: colors.text },
-  heroSubtitle: { ...typography.body, color: colors.textMuted },
-  accountType: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primaryTint,
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
+  flex: { flex: 1 },
+  content: { paddingBottom: spacing.huge },
+  hero: {
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xxl,
+    gap: spacing.xs,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    overflow: 'hidden',
   },
-  accountTypeText: { ...typography.label, color: colors.primaryDarker },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
+  brandMark: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.14)',
+  },
+  brand: { ...typography.subheading, color: '#FFFFFF' },
+  heroTitle: { ...typography.title, color: '#FFFFFF' },
+  heroSubtitle: { ...typography.body, color: 'rgba(255,255,255,0.72)' },
+  form: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, gap: spacing.lg },
   phoneRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
   phoneCodeBox: {
     width: 86,
@@ -391,16 +406,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: c.surfaceMuted,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
-  phoneCodeLabel: { ...typography.caption, color: colors.textMuted },
-  phoneCodeValue: { ...typography.bodyStrong, color: colors.text },
+  phoneCodeLabel: { ...typography.caption, color: c.textMuted },
+  phoneCodeValue: { ...typography.bodyStrong, color: c.text },
   phoneInput: { flex: 1 },
-  phonePreview: { ...typography.caption, color: colors.primaryDark, marginTop: -spacing.sm },
-  reveal: { position: 'absolute', right: spacing.md, bottom: spacing.md },
+  phonePreview: { ...typography.caption, color: c.primaryDark, marginTop: -spacing.sm },
   footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingTop: spacing.sm },
-  footerText: { ...typography.body, color: colors.textMuted },
-  footerLink: { ...typography.bodyStrong, color: colors.primaryDark },
-});
+  footerText: { ...typography.body, color: c.textMuted },
+  footerLink: { ...typography.bodyStrong, color: c.primaryDark },
+}));

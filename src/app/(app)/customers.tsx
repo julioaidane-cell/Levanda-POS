@@ -1,15 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 
-import { Badge, EmptyState, Header, ListItem, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
+import { Avatar, Badge, EmptyState, Header, ListItem, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
 import { mockCustomers } from '@/data/mock/customers';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/format';
 
 export default function CustomersScreen() {
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
@@ -32,9 +32,7 @@ export default function CustomersScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header title="Customers" subtitle="Local sample data" showBack />
-      </View>
+      <Header title="Customers" subtitle="Local sample data" showBack />
 
       <ScreenScroll>
         <View style={styles.tileRow}>
@@ -42,17 +40,17 @@ export default function CustomersScreen() {
             label="Customers"
             value={formatNumber(totals.count)}
             tone="primary"
-            icon={<Ionicons name="people-outline" size={13} color={colors.primary} />}
+            icon={<Ionicons name="people-outline" size={16} color={colors.primary} />}
           />
           <StatTile
             label="Total spent"
             value={formatCurrency(totals.spent)}
-            icon={<Ionicons name="cash-outline" size={13} color={colors.textMuted} />}
+            icon={<Ionicons name="cash-outline" size={16} color={colors.textSecondary} />}
           />
           <StatTile
             label="Orders"
             value={formatNumber(totals.orders)}
-            icon={<Ionicons name="receipt-outline" size={13} color={colors.textMuted} />}
+            icon={<Ionicons name="receipt-outline" size={16} color={colors.textSecondary} />}
           />
         </View>
 
@@ -75,11 +73,7 @@ export default function CustomersScreen() {
                   meta={formatCurrency(customer.totalSpent)}
                   metaCaption={`${formatNumber(customer.orders)} orders`}
                   badge={{ label: customer.status, tone: customer.status === 'Active' ? 'success' : 'primary' }}
-                  leading={
-                    <View style={styles.icon}>
-                      <Ionicons name="person-outline" size={17} color={colors.primaryDark} />
-                    </View>
-                  }
+                  leading={<Avatar name={customer.name} size={40} />}
                 />
               ))}
             </View>
@@ -97,18 +91,10 @@ export default function CustomersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   tileRow: { flexDirection: 'row', gap: spacing.md },
   list: { gap: spacing.sm },
-  icon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
-  },
   notice: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -116,7 +102,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     padding: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: c.surfaceMuted,
   },
-  noticeText: { ...typography.caption, color: colors.textMuted, flex: 1 },
-});
+  noticeText: { ...typography.caption, color: c.textMuted, flex: 1 },
+}));

@@ -6,9 +6,9 @@ import { Button, ErrorView, Input, Section, Select } from '@/components/';
 import { isApiError } from '@/api/errors';
 import type { ShopPayload } from '@/api/types';
 import { useLocationChain, type LocationSelection } from '@/hooks/useLocationChain';
-import { colors, spacing, typography } from '@/theme';
+import { makeStyles, spacing, typography } from '@/theme';
 import { applyServerErrors } from '@/utils/formErrors';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 const shopSchema = z
   .object({
@@ -47,6 +47,7 @@ export interface ShopFormProps {
  * chain and validation live in one place.
  */
 export function ShopForm({ initial, submitLabel, isSubmitting, bannerError, onSubmit, footer }: ShopFormProps) {
+  const styles = useStyles();
   const { control, handleSubmit, setError } = useForm<ShopFormValues>({
     resolver: zodResolver(shopSchema),
     mode: 'onSubmit',
@@ -183,7 +184,7 @@ export function ShopForm({ initial, submitLabel, isSubmitting, bannerError, onSu
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   form: { gap: spacing.lg },
-  footnote: { ...typography.caption, color: colors.textMuted, textAlign: 'center' },
-});
+  footnote: { ...typography.caption, color: c.textMuted, textAlign: 'center' },
+}));

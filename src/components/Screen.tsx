@@ -1,6 +1,13 @@
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
-import { colors, layout, spacing } from '@/theme';
+import { layout, makeStyles, spacing } from '@/theme';
 
 export interface ScreenProps {
   children: React.ReactNode;
@@ -11,11 +18,17 @@ export interface ScreenProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const useStyles = makeStyles((c) => ({
+  flex: { flex: 1, backgroundColor: c.background },
+  withTabBar: { paddingBottom: layout.tabBarHeight + spacing.xl },
+  scrollContent: { padding: layout.screenPadding, paddingBottom: spacing.huge, gap: spacing.md },
+}));
+
 /** Screen shell providing the background colour and optional keyboard inset. */
 export function Screen({ children, withTabBar = false, keyboardAware = false, style }: ScreenProps) {
-  const content = (
-    <View style={[styles.flex, withTabBar && styles.withTabBar, style]}>{children}</View>
-  );
+  const styles = useStyles();
+
+  const content = <View style={[styles.flex, withTabBar && styles.withTabBar, style]}>{children}</View>;
 
   if (!keyboardAware) return content;
 
@@ -23,7 +36,7 @@ export function Screen({ children, withTabBar = false, keyboardAware = false, st
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      keyboardVerticalOffset={0}
     >
       {content}
     </KeyboardAvoidingView>
@@ -42,6 +55,8 @@ export interface ScreenScrollProps {
  * dismiss the keyboard, and optional pull-to-refresh.
  */
 export function ScreenScroll({ children, onRefresh, refreshing = false, contentContainerStyle }: ScreenScrollProps) {
+  const styles = useStyles();
+
   return (
     <ScrollView
       style={styles.flex}
@@ -54,9 +69,3 @@ export function ScreenScroll({ children, onRefresh, refreshing = false, contentC
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  withTabBar: { paddingBottom: layout.tabBarHeight + spacing.xl },
-  scrollContent: { padding: layout.screenPadding, paddingBottom: spacing.huge, gap: spacing.md },
-});

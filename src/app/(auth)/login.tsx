@@ -1,16 +1,16 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { Button, ErrorView, Input } from '@/components/';
+import { Button, Card, ErrorView, Input } from '@/components/';
 import { isApiError } from '@/api/errors';
 import { useAuthStore } from '@/store/authStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, primaryScale, radius, spacing, typography, useTheme } from '@/theme';
 import { applyServerErrors } from '@/utils/formErrors';
 
 const loginSchema = z.object({
@@ -22,12 +22,12 @@ type LoginValues = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
   const login = useAuthStore((state) => state.login);
   const isSubmitting = useAuthStore((state) => state.isSubmitting);
   const bannerError = useAuthStore((state) => state.error);
   const clearError = useAuthStore((state) => state.clearError);
-
-  const [showPassword, setShowPassword] = useState(false);
 
   const { control, handleSubmit, setError } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -48,134 +48,134 @@ export default function LoginScreen() {
   const showBanner = isApiError(bannerError) && !bannerError.isValidation;
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <View style={[styles.hero, { paddingTop: insets.top + spacing.xxl }]}>
-        <View style={styles.brandRow}>
-          <View style={styles.brandMark}>
-            <Ionicons name="storefront" size={20} color={colors.chrome} />
-          </View>
-          <Text style={styles.brand}>Levanda POS</Text>
-        </View>
-        <Text style={styles.heroTitle}>Welcome back</Text>
-        <Text style={styles.heroSubtitle}>Sign in to manage your shops and products.</Text>
-      </View>
-
-      <View style={styles.body}>
-        <View style={styles.form}>
-          {showBanner && bannerError ? (
-            <ErrorView error={bannerError} compact />
-          ) : null}
-
-          <Controller
-            control={control}
-            name="username"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <Input
-                label="Username"
-                icon="person-outline"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={fieldState.error?.message}
-                autoCapitalize="none"
-                autoCorrect={false}
-                textContentType="username"
-                returnKeyType="next"
-                required
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-              <View>
-                <Input
-                  label="Password"
-                  icon="lock-closed-outline"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={fieldState.error?.message}
-                  secureTextEntry={!showPassword}
-                  textContentType="password"
-                  returnKeyType="go"
-                  onSubmitEditing={onSubmit}
-                  required
-                />
-                <Pressable
-                  onPress={() => setShowPassword((current) => !current)}
-                  hitSlop={10}
-                  style={styles.reveal}
-                  accessibilityRole="button"
-                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={18}
-                    color={colors.textMuted}
-                  />
-                </Pressable>
+    <View style={styles.root}>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          bounces={false}
+        >
+          <LinearGradient
+            colors={[primaryScale[800], colors.chrome]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.hero, { paddingTop: insets.top + spacing.xxxl }]}
+          >
+            <View style={styles.brandRow}>
+              <View style={styles.brandMark}>
+                <Ionicons name="storefront" size={20} color={colors.onPrimary} />
               </View>
-            )}
-          />
+              <Text style={styles.brand}>Levanda POS</Text>
+            </View>
+            <Text style={styles.heroTitle}>Welcome back</Text>
+            <Text style={styles.heroSubtitle}>Sign in to manage your shops and products.</Text>
+          </LinearGradient>
 
-          <Button
-            label="Sign in"
-            onPress={onSubmit}
-            loading={isSubmitting}
-            size="lg"
-            fullWidth
-            icon="log-in-outline"
-          />
-        </View>
+          <View style={styles.body}>
+            <Card style={styles.card} flat>
+              {showBanner && bannerError ? <ErrorView error={bannerError} compact /> : null}
 
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>New to Levanda POS? </Text>
-          <Link href="/(auth)/register" asChild>
-            <Pressable accessibilityRole="link" hitSlop={8}>
-              <Text style={styles.footerLink}>Create an account</Text>
-            </Pressable>
-          </Link>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+              <Controller
+                control={control}
+                name="username"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Username"
+                    icon="person-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    textContentType="username"
+                    returnKeyType="next"
+                    required
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value }, fieldState }) => (
+                  <Input
+                    label="Password"
+                    icon="lock-closed-outline"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={fieldState.error?.message}
+                    secureTextEntry
+                    textContentType="password"
+                    returnKeyType="go"
+                    onSubmitEditing={onSubmit}
+                    required
+                  />
+                )}
+              />
+
+              <Button
+                label="Sign in"
+                onPress={onSubmit}
+                loading={isSubmitting}
+                size="lg"
+                fullWidth
+                icon="log-in-outline"
+                style={styles.submit}
+              />
+            </Card>
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>New to Levanda POS? </Text>
+              <Link href="/(auth)/register" asChild>
+                <Pressable accessibilityRole="link" hitSlop={8}>
+                  <Text style={styles.footerLink}>Create an account</Text>
+                </Pressable>
+              </Link>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
+  flex: { flex: 1 },
+  content: { flexGrow: 1 },
   hero: {
-    backgroundColor: colors.chrome,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.giant,
     gap: spacing.sm,
+    borderBottomLeftRadius: radius.xxl,
+    borderBottomRightRadius: radius.xxl,
+    overflow: 'hidden',
   },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
   brandMark: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.14)',
   },
-  brand: { ...typography.heading, color: colors.textInverse },
-  heroTitle: { ...typography.display, color: colors.textInverse },
-  heroSubtitle: { ...typography.body, color: colors.chromeMuted },
-  body: { flex: 1, justifyContent: 'space-between', padding: spacing.lg },
-  form: { gap: spacing.lg, marginTop: spacing.xl },
-  reveal: { position: 'absolute', right: spacing.md, bottom: spacing.md },
+  brand: { ...typography.heading, color: '#FFFFFF' },
+  heroTitle: { ...typography.display, color: '#FFFFFF' },
+  heroSubtitle: { ...typography.body, color: 'rgba(255,255,255,0.72)' },
+  body: { flex: 1, justifyContent: 'space-between', padding: spacing.lg, gap: spacing.lg },
+  card: { marginTop: -spacing.giant, gap: spacing.lg },
+  submit: { marginTop: spacing.xs },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.lg,
   },
-  footerText: { ...typography.body, color: colors.textMuted },
-  footerLink: { ...typography.bodyStrong, color: colors.primaryDark },
-});
+  footerText: { ...typography.body, color: c.textMuted },
+  footerLink: { ...typography.bodyStrong, color: c.primaryDark },
+}));

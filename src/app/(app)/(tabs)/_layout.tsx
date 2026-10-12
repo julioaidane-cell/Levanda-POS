@@ -1,26 +1,39 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { StyleSheet } from 'react-native';
 import type { ColorValue } from 'react-native';
 
-import { colors, typography } from '@/theme';
+import { makeStyles, typography, useTheme } from '@/theme';
 
 type IconProps = { color: ColorValue; size: number; focused: boolean };
+
+const useStyles = makeStyles((c) => ({
+  tabBar: {
+    backgroundColor: c.chrome,
+    borderTopColor: c.chromeBorder,
+    borderTopWidth: 1,
+  },
+  tabItem: { paddingTop: 6 },
+  tabLabel: { ...typography.caption, fontSize: 11, fontWeight: '600' },
+}));
 
 /**
  * Bottom tabs replace the web sidebar. The bar keeps the near-black chrome and
  * teal active tint measured from the Levanda POS screenshots.
  */
 export default function TabsLayout() {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: colors.primarySoft,
         tabBarInactiveTintColor: colors.chromeMuted,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabLabel,
         tabBarItemStyle: styles.tabItem,
+        tabBarHideOnKeyboard: true,
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
@@ -56,19 +69,11 @@ export default function TabsLayout() {
         name="more"
         options={{
           title: 'More',
-          tabBarIcon: ({ color, size }: IconProps) => <Ionicons name="ellipsis-horizontal-circle-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }: IconProps) => (
+            <Ionicons name="ellipsis-horizontal-circle-outline" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  tabBar: {
-    backgroundColor: colors.chrome,
-    borderTopColor: 'rgba(255,255,255,0.10)',
-    borderTopWidth: 1,
-  },
-  tabItem: { paddingVertical: 4 },
-  tabLabel: { ...typography.caption, fontWeight: '600' },
-});

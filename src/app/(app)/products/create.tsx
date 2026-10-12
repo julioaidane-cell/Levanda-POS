@@ -1,18 +1,18 @@
 import { useRouter } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 
-import { EmptyState, Header, ProductForm } from '@/components/';
+import { EmptyState, Header, ProductForm, useToast } from '@/components/';
 import { createProduct } from '@/api/products';
 import { toMessage } from '@/api/errors';
 import { useActiveShop } from '@/store/shopStore';
-import { colors, layout, spacing } from '@/theme';
-import { useState } from 'react';
+import { layout, makeStyles, spacing } from '@/theme';
 
 export default function CreateProductScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const styles = useStyles();
   const activeShop = useActiveShop();
+  const toast = useToast();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -23,6 +23,7 @@ export default function CreateProductScreen() {
     setError(null);
     try {
       await createProduct(activeShop.id, payload);
+      toast.success('Product created');
       router.back();
     } catch (caught) {
       setError(caught ?? new Error(toMessage(caught)));
@@ -32,9 +33,7 @@ export default function CreateProductScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header title="New product" subtitle={activeShop?.name ?? 'No active shop'} showBack />
-      </View>
+      <Header title="New product" subtitle={activeShop?.name ?? 'No active shop'} showBack />
 
       {activeShop === null ? (
         <View style={styles.centered}>
@@ -68,9 +67,9 @@ export default function CreateProductScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   flex: { flex: 1 },
   centered: { flex: 1, justifyContent: 'center', padding: layout.screenPadding },
   content: { padding: layout.screenPadding, paddingBottom: spacing.huge },
-});
+}));

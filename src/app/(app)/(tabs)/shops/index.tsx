@@ -1,18 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, View } from 'react-native';
 
-import { ConfirmDialog, EmptyState, ErrorView, Header, ListItem, ScreenScroll } from '@/components/';
+import { ConfirmDialog, EmptyState, ErrorView, Header, ListItem, ScreenScroll, Touchable } from '@/components/';
 import { SkeletonList } from '@/components/Loader';
 import { useShopStore } from '@/store/shopStore';
-import { colors, radius, spacing, typography } from '@/theme';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { joinLocation } from '@/utils/format';
 
 export default function ShopsListScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+  const styles = useStyles();
 
   const shops = useShopStore((state) => state.shops);
   const status = useShopStore((state) => state.status);
@@ -49,15 +49,13 @@ export default function ShopsListScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={{ paddingTop: insets.top }}>
-        <Header
-          title="Shops"
-          subtitle={`${shops.length} shop${shops.length === 1 ? '' : 's'} available`}
-          showShopSwitcher
-          onAddShop={() => router.push('/shops/create')}
-          actions={[{ icon: 'add', label: 'Add shop', onPress: () => router.push('/shops/create') }]}
-        />
-      </View>
+      <Header
+        title="Shops"
+        subtitle={`${shops.length} shop${shops.length === 1 ? '' : 's'} available`}
+        showShopSwitcher
+        onAddShop={() => router.push('/shops/create')}
+        actions={[{ icon: 'add', label: 'Add shop', onPress: () => router.push('/shops/create') }]}
+      />
 
       <ScreenScroll onRefresh={() => void refresh().catch(() => undefined)} refreshing={status === 'loading' && shops.length > 0}>
         {error && status === 'error' ? <ErrorView error={error} onRetry={() => void refresh().catch(() => undefined)} /> : null}
@@ -89,13 +87,9 @@ export default function ShopsListScreen() {
                   }
                 />
                 <View style={styles.itemActions}>
-                  <Text style={styles.hint}>Tap to make active</Text>
+                  <Text style={styles.hint}>{shop.id === activeShopId ? 'Active shop' : 'Tap to make active'}</Text>
                   <View style={styles.actionButtons}>
-                    <IconAction
-                      icon="create-outline"
-                      label="Edit"
-                      onPress={() => router.push(`/shops/${shop.id}/edit`)}
-                    />
+                    <IconAction icon="create-outline" label="Edit" onPress={() => router.push(`/shops/${shop.id}/edit`)} />
                     <IconAction
                       icon="trash-outline"
                       label="Delete"
@@ -140,23 +134,27 @@ interface IconActionProps {
 }
 
 function IconAction({ icon, label, onPress, tone = 'default' }: IconActionProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
   const color = tone === 'danger' ? colors.danger : colors.textSecondary;
   return (
-    <Pressable
+    <Touchable
       accessibilityRole="button"
       accessibilityLabel={label}
+      haptic="light"
+      scaleTo={0.96}
       onPress={onPress}
       hitSlop={6}
-      style={({ pressed }) => [styles.iconAction, pressed && styles.pressed]}
+      style={styles.iconAction}
     >
       <Ionicons name={icon} size={15} color={color} />
       <Text style={[styles.iconActionLabel, { color }]}>{label}</Text>
-    </Pressable>
+    </Touchable>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((c) => ({
+  root: { flex: 1, backgroundColor: c.background },
   list: { gap: spacing.lg },
   itemWrap: { gap: spacing.xs },
   itemActions: {
@@ -165,7 +163,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.xs,
   },
-  hint: { ...typography.caption, color: colors.textMuted },
+  hint: { ...typography.caption, color: c.textMuted },
   actionButtons: { flexDirection: 'row', gap: spacing.sm },
   iconAction: {
     flexDirection: 'row',
@@ -174,19 +172,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.pill,
-    backgroundColor: colors.surface,
+    backgroundColor: c.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: c.border,
   },
   iconActionLabel: { ...typography.caption, fontWeight: '600' },
-  pressed: { opacity: 0.6 },
   icon: {
     width: 40,
     height: 40,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryTint,
+    backgroundColor: c.primaryTint,
   },
-  footnote: { ...typography.caption, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm },
-});
+  footnote: { ...typography.caption, color: c.textMuted, textAlign: 'center', marginTop: spacing.sm },
+}));

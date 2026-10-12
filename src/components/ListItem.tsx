@@ -1,8 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Text, View } from 'react-native';
 
 import { Badge } from './Card';
-import { colors, radius, spacing, typography } from '@/theme';
+import { Touchable } from './Touchable';
+import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 
 export interface ListItemProps {
   title: string;
@@ -16,7 +17,35 @@ export interface ListItemProps {
   /** Shows a chevron; omit when there is no detail screen to open. */
   showChevron?: boolean;
   isActive?: boolean;
+  /** Dims the row content, e.g. inactive products. */
+  muted?: boolean;
 }
+
+const useStyles = makeStyles((c) => ({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    minHeight: 68,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: c.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: c.border,
+  },
+  activeRow: { borderColor: c.primary, backgroundColor: c.primaryTint },
+  leading: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  textWrap: { flex: 1, gap: 2 },
+  title: { ...typography.subheading, color: c.text },
+  mutedText: { color: c.textMuted },
+  subtitle: { ...typography.caption, color: c.textMuted },
+  badgeWrap: { marginTop: spacing.xxs, flexDirection: 'row' },
+  metaWrap: { alignItems: 'flex-end', gap: 2, maxWidth: 130 },
+  meta: { ...typography.subheading, color: c.text },
+  metaCaption: { ...typography.caption, color: c.textMuted },
+  chevron: { paddingLeft: spacing.xxs },
+}));
 
 export function ListItem({
   title,
@@ -28,13 +57,17 @@ export function ListItem({
   onPress,
   showChevron,
   isActive,
+  muted,
 }: ListItemProps) {
+  const { colors } = useTheme();
+  const styles = useStyles();
+
   const body = (
     <View style={[styles.row, isActive && styles.activeRow]}>
       {leading ? <View style={styles.leading}>{leading}</View> : null}
 
       <View style={styles.textWrap}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={[styles.title, muted && styles.mutedText]} numberOfLines={1}>
           {title}
         </Text>
         {subtitle ? (
@@ -51,14 +84,24 @@ export function ListItem({
 
       {meta || metaCaption ? (
         <View style={styles.metaWrap}>
-          {meta ? <Text style={styles.meta} numberOfLines={1}>{meta}</Text> : null}
-          {metaCaption ? <Text style={styles.metaCaption} numberOfLines={1}>{metaCaption}</Text> : null}
+          {meta ? (
+            <Text style={[styles.meta, muted && styles.mutedText]} numberOfLines={1} adjustsFontSizeToFit>
+              {meta}
+            </Text>
+          ) : null}
+          {metaCaption ? (
+            <Text style={styles.metaCaption} numberOfLines={1}>
+              {metaCaption}
+            </Text>
+          ) : null}
         </View>
       ) : null}
 
       {isActive ? <Ionicons name="checkmark-circle" size={20} color={colors.primary} /> : null}
       {showChevron && !isActive ? (
-        <Ionicons name="chevron-forward" size={18} color={colors.textDisabled} />
+        <View style={styles.chevron}>
+          <Ionicons name="chevron-forward" size={18} color={colors.textDisabled} />
+        </View>
       ) : null}
     </View>
   );
@@ -66,38 +109,15 @@ export function ListItem({
   if (!onPress) return body;
 
   return (
-    <Pressable
+    <Touchable
       accessibilityRole="button"
       accessibilityState={{ selected: isActive }}
+      accessibilityLabel={title}
+      scaleTo={0.99}
+      haptic="light"
       onPress={onPress}
-      style={({ pressed }) => [pressed && styles.pressed]}
     >
       {body}
-    </Pressable>
+    </Touchable>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: 68,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  activeRow: { borderColor: colors.primary, backgroundColor: colors.primaryWash },
-  pressed: { opacity: 0.9 },
-  leading: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  textWrap: { flex: 1, gap: 2 },
-  title: { ...typography.subheading, color: colors.text },
-  subtitle: { ...typography.caption, color: colors.textMuted },
-  badgeWrap: { marginTop: spacing.xxs },
-  metaWrap: { alignItems: 'flex-end', gap: 2, maxWidth: 130 },
-  meta: { ...typography.subheading, color: colors.text },
-  metaCaption: { ...typography.caption, color: colors.textMuted },
-});
