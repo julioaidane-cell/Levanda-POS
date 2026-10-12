@@ -16,6 +16,7 @@ Suppliers and Customers modules.
 | Server state | Axios client with interceptors + Zustand stores   |
 | Forms        | React Hook Form + Zod                             |
 | Storage      | `expo-secure-store` (token), AsyncStorage (rest)  |
+| Notifications | `expo-notifications` (permission-gated, mock feed) |
 
 Native modules used (`expo-secure-store`, `expo-build-properties`) mean Expo Go
 is **not** sufficient — see [Running the app](#running-the-app).
@@ -37,6 +38,11 @@ runtime requirement, so install with:
 ```bash
 npm install --legacy-peer-deps
 ```
+
+The same applies to `npx expo install <package>` for new native packages (e.g.
+`expo-notifications` was added with
+`npx expo install expo-notifications --legacy-peer-deps`), because it shells out
+to npm under the hood.
 
 ### Environment variables
 
@@ -98,19 +104,22 @@ src/
 │  ├─ (auth)/               # login, register
 │  ├─ (app)/                # authenticated stack
 │  │  ├─ _layout.tsx        # auth guard + shop/currency bootstrap
-│  │  ├─ (tabs)/            # home, products, shops, expenses, more
+│  │  ├─ (tabs)/            # tab screens + hidden section routes
+│  │  │  ├─ _layout.tsx     # bottom tabs (home, products, shops, expenses, more)
+│  │  │  ├─ sell/orders/sales-reports.tsx  # hidden section placeholders
+│  │  │  └─ customers/suppliers.tsx        # static modules, hidden section routes
 │  │  ├─ shops/             # create, [id]/edit
 │  │  ├─ products/          # create, [id]
-│  │  ├─ customers.tsx      # static module (sample data)
-│  │  └─ suppliers.tsx      # static module (sample data)
+│  │  └─ notifications.tsx  # in-app notification feed (modal)
 ├─ api/                     # one module per resource + client, types, errors
 ├─ components/              # reusable UI (the only place styles are defined)
 ├─ data/mock/               # sample data for modules with no backend
-├─ hooks/                   # useAsyncResource, useLocationChain
-├─ store/                   # Zustand: auth, shop, company
+├─ hooks/                   # useAsyncResource, useLocationChain, useToggleNotifications
+├─ navigation/              # section-tab definitions shared by the header
+├─ store/                   # Zustand: auth, shop, company, notifications
 ├─ theme/                   # colours, spacing, radius, typography tokens
 ├─ types/                   # types for mock-backed modules
-└─ utils/                   # formatters, storage, currency, form errors
+└─ utils/                   # formatters, storage, currency, form errors, notifications
 ```
 
 Navigation and non-route code are deliberately separated: `src/app` holds
@@ -177,6 +186,36 @@ When the flag is off the request is skipped entirely; if the backend answers
 `403` anyway, the create form drops the category field instead of failing.
 Products are always creatable without a category.
 
+### Navigation and section tabs
+
+The main screens share one sticky header, `ScreenHeader`, which stacks the
+`AppHeader` (shop switcher, notification bell, account avatar) above a
+horizontally scrolling `SectionTabs` pill row. `src/navigation/sections.ts` is
+the single source of truth for the pills; `SectionTabs` derives the active pill
+from the current route (so `/products/123` still highlights **Products**) and
+`router.replace`s between sections.
+
+Sections that are not bottom-bar destinations (**Sell**, **Orders**, **Sales
+Reports**, **Customers**, **Suppliers**) live inside `(app)/(tabs)/` with
+`href: null`, so they keep the bottom bar and shared header while staying out of
+the tab bar itself. Each screen that owns a primary action renders its own
+`FAB`; `ScreenScroll withFAB` reserves space so content never hides behind it.
+
+### Notifications
+
+`useNotificationsStore` (Zustand) holds the enabled flag, the feed and the
+unread count. The enabled flag persists to AsyncStorage; the feed is seeded from
+`src/data/mock/notifications.ts` until a backend endpoint exists.
+
+The bell in `AppHeader` shows a dot whenever the feature is on and there are
+unread items, and deep-links to `/notifications`. `NotificationToggle` (used on
+**More** and inside the notifications screen) is the only place that turns the
+feature on: it haptics, then calls `ensureNotificationPermission`
+(`src/utils/notifications.ts`), which requests OS permission via
+`expo-notifications`. Push is unavailable in Expo Go, so the helper degrades to
+the in-app feed there; a denial reverts the switch and offers an "Open settings"
+toast action.
+
 ---
 
 ## Verified API behaviour
@@ -209,6 +248,12 @@ the user, and the country supplies the phone dialling code.
 - **Product editing** is not implemented — the API exposes create, list, show
   and delete for products, and only shop update was in scope.
 - **Sales / checkout** is out of scope for this assignment.
+- **Notifications** have no backend endpoint yet: the feed is sample data, the
+  enabled flag is local, and no remote push token is registered. The permission
+  flow is real, so wiring an endpoint later only means replacing
+  `src/data/mock/notifications.ts` and the store's `// TODO` fetch.
+- **Sell / Orders / Sales Reports** are navigation placeholders only, so the
+  section pills mirror the full reference app without faking data.
 
 ---
 
@@ -257,10 +302,11 @@ colour or a spacing value.
 Screens compose reusable components from `src/components` rather than
 restyling: `Button`, `Touchable`, `Input` (animated focus, password toggle),
 `Select` (animated searchable bottom sheet), `SearchBar`, `Card`/`Badge`,
-`Avatar`, `Chip`, `Divider`, `ListItem`, `Header` (safe-area aware),
-`ShopSwitcher`, `FAB`, `Screen`/`ScreenScroll`, `Section`/`SectionHeader`,
-`StatTile`, `Loader`/`Skeleton`, `EmptyState`, `ErrorView`, `ConfirmDialog`,
-`ShopForm`, `ProductForm`.
+`Avatar`, `Chip`, `Divider`, `ListItem`, `Header` (safe-area aware, detail/form
+screens), `ScreenHeader` + `AppHeader` + `SectionTabs` (shared main-screen
+header), `NotificationToggle`, `ShopSwitcher`, `FAB`, `Screen`/`ScreenScroll`,
+`Section`/`SectionHeader`, `StatTile`, `Loader`/`Skeleton`, `EmptyState`,
+`ErrorView`, `ConfirmDialog`, `ShopForm`, `ProductForm`.
 
 Every screen provides loading (skeleton), empty and error-with-retry states;
 empty states are only shown once a load has actually succeeded, so they never

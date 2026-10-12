@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 import { Text, View } from 'react-native';
 
-import { Badge, Card, EmptyState, ErrorView, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
+import { Badge, Card, EmptyState, ErrorView, FAB, ListItem, ScreenHeader, ScreenScroll, Section, StatTile } from '@/components/';
 import { fetchProducts } from '@/api/products';
 import type { ProductListPayload } from '@/api/types';
 import { useAsyncResource } from '@/hooks/useAsyncResource';
@@ -47,7 +47,7 @@ export default function DashboardScreen() {
   );
 
   const addShop = useCallback(() => router.push('/shops/create'), [router]);
-  const manageShops = useCallback(() => router.push('/shops'), [router]);
+  const sell = useCallback(() => router.push('/sell'), [router]);
 
   const list = products.data?.products ?? [];
   const lowStock = list.filter((product) => {
@@ -64,16 +64,9 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.root}>
-      <Header
-        title="Dashboard"
-        subtitle={activeShop?.name ?? 'No active shop'}
-        showShopSwitcher
-        onAddShop={addShop}
-        onManageShops={manageShops}
-        actions={[{ icon: 'log-out-outline', label: 'Log out', onPress: () => router.push('/more') }]}
-      />
+      <ScreenHeader />
 
-      <ScreenScroll onRefresh={onRefresh} refreshing={products.isRefreshing}>
+      <ScreenScroll onRefresh={onRefresh} refreshing={products.isRefreshing} withFAB>
         {shopsStatus === 'loading' && shops.length === 0 ? <SkeletonList count={3} /> : null}
 
         {shopsStatus === 'error' && shops.length === 0 ? (
@@ -197,6 +190,8 @@ export default function DashboardScreen() {
           </>
         ) : null}
       </ScreenScroll>
+
+      <FAB icon="cart-outline" label="Sell Products" accessibilityLabel="Sell products" onPress={sell} />
     </View>
   );
 }

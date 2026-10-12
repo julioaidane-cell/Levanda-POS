@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { ConfirmDialog, EmptyState, ErrorView, Header, ListItem, ScreenScroll, Touchable } from '@/components/';
+import { ConfirmDialog, EmptyState, ErrorView, ListItem, ScreenHeader, ScreenScroll, Touchable } from '@/components/';
 import { SkeletonList } from '@/components/Loader';
 import { useShopStore } from '@/store/shopStore';
 import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
@@ -49,13 +49,7 @@ export default function ShopsListScreen() {
 
   return (
     <View style={styles.root}>
-      <Header
-        title="Shops"
-        subtitle={`${shops.length} shop${shops.length === 1 ? '' : 's'} available`}
-        showShopSwitcher
-        onAddShop={() => router.push('/shops/create')}
-        actions={[{ icon: 'add', label: 'Add shop', onPress: () => router.push('/shops/create') }]}
-      />
+      <ScreenHeader />
 
       <ScreenScroll onRefresh={() => void refresh().catch(() => undefined)} refreshing={status === 'loading' && shops.length > 0}>
         {error && status === 'error' ? <ErrorView error={error} onRetry={() => void refresh().catch(() => undefined)} /> : null}

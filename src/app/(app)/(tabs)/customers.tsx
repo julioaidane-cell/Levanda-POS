@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { Avatar, Badge, EmptyState, Header, ListItem, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
+import { Avatar, Badge, EmptyState, ListItem, ScreenHeader, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
 import { mockCustomers } from '@/data/mock/customers';
 import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatDate, formatNumber } from '@/utils/format';
@@ -32,7 +32,7 @@ export default function CustomersScreen() {
 
   return (
     <View style={styles.root}>
-      <Header title="Customers" subtitle="Local sample data" showBack />
+      <ScreenHeader />
 
       <ScreenScroll>
         <View style={styles.tileRow}>

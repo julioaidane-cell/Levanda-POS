@@ -11,10 +11,18 @@ import { useShopStore } from '@/store/shopStore';
 import { elevation, makeStyles, radius, spacing, typography, useReduceMotion, useTheme } from '@/theme';
 import { joinLocation } from '@/utils/format';
 
+export interface ShopSwitcherTriggerState {
+  /** Opens the shop switcher sheet. */
+  open: () => void;
+  /** Whether the sheet is currently open. */
+  expanded: boolean;
+}
+
 export interface ShopSwitcherProps {
-  /** Compact trigger for the app bar; omit to render the trigger-less content. */
   onAddShop: () => void;
   onManageShops?: () => void;
+  /** Replaces the default pill trigger, e.g. with the app-header shop block. */
+  renderTrigger?: (state: ShopSwitcherTriggerState) => React.ReactNode;
 }
 
 const useStyles = makeStyles((c) => ({
@@ -95,7 +103,7 @@ const useStyles = makeStyles((c) => ({
  * Bottom-sheet shop switcher. Selecting a shop updates the store, which is the
  * single source of truth for every product request in the app.
  */
-export function ShopSwitcher({ onAddShop, onManageShops }: ShopSwitcherProps) {
+export function ShopSwitcher({ onAddShop, onManageShops, renderTrigger }: ShopSwitcherProps) {
   const { colors } = useTheme();
   const styles = useStyles();
   const reduceMotion = useReduceMotion();
@@ -118,21 +126,25 @@ export function ShopSwitcher({ onAddShop, onManageShops }: ShopSwitcherProps) {
 
   return (
     <>
-      <Touchable
-        accessibilityRole="button"
-        accessibilityLabel={`Active shop: ${activeShop?.name ?? 'none selected'}. Tap to switch shop.`}
-        accessibilityState={{ expanded: open }}
-        haptic="selection"
-        scaleTo={0.97}
-        onPress={() => setOpen(true)}
-        style={styles.trigger}
-      >
-        <Ionicons name="storefront-outline" size={14} color={colors.primary} />
-        <Text style={styles.triggerText} numberOfLines={1}>
-          {activeShop?.name ?? 'Select a shop'}
-        </Text>
-        <Ionicons name="swap-vertical" size={14} color={colors.primary} />
-      </Touchable>
+      {renderTrigger ? (
+        renderTrigger({ open: () => setOpen(true), expanded: open })
+      ) : (
+        <Touchable
+          accessibilityRole="button"
+          accessibilityLabel={`Active shop: ${activeShop?.name ?? 'none selected'}. Tap to switch shop.`}
+          accessibilityState={{ expanded: open }}
+          haptic="selection"
+          scaleTo={0.97}
+          onPress={() => setOpen(true)}
+          style={styles.trigger}
+        >
+          <Ionicons name="storefront-outline" size={14} color={colors.primary} />
+          <Text style={styles.triggerText} numberOfLines={1}>
+            {activeShop?.name ?? 'Select a shop'}
+          </Text>
+          <Ionicons name="swap-vertical" size={14} color={colors.primary} />
+        </Touchable>
+      )}
 
       <Modal visible={open} transparent animationType="none" onRequestClose={() => setOpen(false)} statusBarTranslucent>
         <View style={styles.modalRoot}>

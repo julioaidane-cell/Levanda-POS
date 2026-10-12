@@ -39,6 +39,8 @@ export const hitSize = {
 export const borderWidth = {
   none: 0,
   hairline: 1,
+  /** The outlined section-tab pill. */
+  pill: 1.5,
   thick: 2,
 } as const;
 
@@ -118,6 +120,19 @@ export const layout = {
   screenPadding: spacing.lg,
   tabBarHeight: 60,
   maxContentWidth: 560,
+  /** Height of a section-tab pill (touch target is larger via hitSlop). */
+  pillHeight: 40,
+  /** Size of the round "»" overflow button at the end of the section tabs. */
+  overflowButtonSize: 32,
+  /** Round controls in the app header: bell button and avatar. */
+  headerControl: 40,
+  /** Floating action button diameter. */
+  fabSize: 56,
+  /**
+   * Extra bottom padding for scrollable screens that show a FAB, so the button
+   * never sits on top of the last row (tab bar + FAB + breathing room).
+   */
+  fabClearance: 60 + 56 + spacing.xxl,
 } as const;
 
 export type SpacingToken = keyof typeof spacing;

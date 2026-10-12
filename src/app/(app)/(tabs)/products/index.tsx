@@ -3,7 +3,7 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo } from 'react';
 import { View } from 'react-native';
 
-import { EmptyState, ErrorView, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
+import { EmptyState, ErrorView, FAB, ListItem, ScreenHeader, ScreenScroll, Section, StatTile } from '@/components/';
 import { SkeletonList } from '@/components/Loader';
 import { fetchProducts } from '@/api/products';
 import type { ProductListPayload } from '@/api/types';
@@ -46,20 +46,9 @@ export default function ProductsListScreen() {
 
   return (
     <View style={styles.root}>
-      <Header
-        title="Products"
-        subtitle={activeShop?.name ?? 'No active shop'}
-        showShopSwitcher
-        onAddShop={() => router.push('/shops/create')}
-        onManageShops={() => router.push('/shops')}
-        actions={
-          activeShopId === null
-            ? []
-            : [{ icon: 'add', label: 'Add product', onPress: () => router.push('/products/create') }]
-        }
-      />
+      <ScreenHeader />
 
-      <ScreenScroll onRefresh={onRefresh} refreshing={products.isRefreshing}>
+      <ScreenScroll onRefresh={onRefresh} refreshing={products.isRefreshing} withFAB>
         {activeShopId === null && shopsLoaded ? (
           <EmptyState
             title="Select a shop first"
@@ -131,6 +120,15 @@ export default function ProductsListScreen() {
           </>
         ) : null}
       </ScreenScroll>
+
+      {activeShopId !== null ? (
+        <FAB
+          icon="add"
+          label="Add product"
+          accessibilityLabel="Add product"
+          onPress={() => router.push('/products/create')}
+        />
+      ) : null}
     </View>
   );
 }

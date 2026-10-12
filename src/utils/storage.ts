@@ -11,6 +11,8 @@ const TOKEN_KEY = 'levanda.auth.token';
 const USER_KEY = 'levanda.auth.user';
 const COMPANY_KEY = 'levanda.auth.company';
 const ACTIVE_SHOP_KEY = 'levanda.shops.activeId';
+/** Deliberately unprefixed: the notifications toggle is a device preference. */
+const NOTIFICATIONS_ENABLED_KEY = 'notifications_enabled';
 
 export const secureStore = {
   async getToken(): Promise<string | null> {
@@ -66,4 +68,5 @@ export const keys = {
   user: USER_KEY,
   company: COMPANY_KEY,
   activeShopId: ACTIVE_SHOP_KEY,
+  notificationsEnabled: NOTIFICATIONS_ENABLED_KEY,
 } as const;

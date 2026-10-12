@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Text, View } from 'react-native';
 
-import { Avatar, Button, Card, Header, ListItem, ScreenScroll, Section } from '@/components/';
+import { Avatar, Button, Card, ListItem, NotificationToggle, ScreenHeader, ScreenScroll, Section } from '@/components/';
 import { useActiveShop, useShopStore } from '@/store/shopStore';
 import { useAuthStore } from '@/store/authStore';
 import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
@@ -41,7 +41,7 @@ export default function MoreScreen() {
 
   return (
     <View style={styles.root}>
-      <Header title="More" subtitle="Account and modules" />
+      <ScreenHeader showTabs={false} />
 
       <ScreenScroll>
         <Card style={styles.profile}>
@@ -56,6 +56,10 @@ export default function MoreScreen() {
             </Text>
           </View>
         </Card>
+
+        <Section title="Notifications">
+          <NotificationToggle />
+        </Section>
 
         <Section title="Modules">
           <View style={styles.list}>

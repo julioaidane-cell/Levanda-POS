@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 
-import { Avatar, Badge, EmptyState, Header, ListItem, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
+import { Avatar, Badge, EmptyState, ListItem, ScreenHeader, ScreenScroll, SearchBar, Section, StatTile } from '@/components/';
 import { mockSuppliers } from '@/data/mock/suppliers';
 import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatNumber } from '@/utils/format';
@@ -31,7 +31,7 @@ export default function SuppliersScreen() {
 
   return (
     <View style={styles.root}>
-      <Header title="Suppliers" subtitle="Local sample data" showBack />
+      <ScreenHeader />
 
       <ScreenScroll>
         <View style={styles.tileRow}>

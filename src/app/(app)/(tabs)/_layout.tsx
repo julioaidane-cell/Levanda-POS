@@ -75,6 +75,17 @@ export default function TabsLayout() {
           ),
         }}
       />
+
+      {/*
+        Section routes reachable from the pill row but intentionally kept out of
+        the bottom bar. `href: null` hides the button while keeping the screen in
+        this navigator, so the bottom bar and shared header stay mounted.
+      */}
+      <Tabs.Screen name="sell" options={{ href: null }} />
+      <Tabs.Screen name="orders" options={{ href: null }} />
+      <Tabs.Screen name="sales-reports" options={{ href: null }} />
+      <Tabs.Screen name="customers" options={{ href: null }} />
+      <Tabs.Screen name="suppliers" options={{ href: null }} />
     </Tabs>
   );
 }

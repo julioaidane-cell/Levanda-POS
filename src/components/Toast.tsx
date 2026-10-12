@@ -14,11 +14,18 @@ export interface ToastOptions {
   tone?: ToastTone;
   /** Milliseconds before auto-dismiss. Defaults to 3200. */
   duration?: number;
+  /** Optional action rendered at the end of the toast (e.g. "Open settings"). */
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
-interface ToastItem extends Required<Omit<ToastOptions, 'tone'>> {
-  tone: ToastTone;
+interface ToastItem {
   id: number;
+  message: string;
+  tone: ToastTone;
+  duration: number;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 interface ToastContextValue {
@@ -61,6 +68,8 @@ const useStyles = makeStyles((c) => ({
     justifyContent: 'center',
   },
   message: { ...typography.bodyStrong, flex: 1 },
+  action: { paddingVertical: spacing.xxs, paddingHorizontal: spacing.sm },
+  actionLabel: { ...typography.button, color: c.primary },
 }));
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -74,6 +83,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       message: options.message,
       tone: options.tone ?? 'info',
       duration: options.duration ?? 3200,
+      actionLabel: options.actionLabel,
+      onAction: options.onAction,
     });
   }, []);
 
@@ -133,6 +144,22 @@ function ToastHost({ item, onDismiss }: { item: ToastItem | null; onDismiss: () 
         <Text style={[styles.message, { color: colors.text }]} numberOfLines={2}>
           {item.message}
         </Text>
+        {item.actionLabel && item.onAction ? (
+          <Touchable
+            accessibilityRole="button"
+            accessibilityLabel={item.actionLabel}
+            haptic="light"
+            scaleTo={0.94}
+            hitSlop={6}
+            onPress={() => {
+              item.onAction?.();
+              onDismiss();
+            }}
+            style={styles.action}
+          >
+            <Text style={styles.actionLabel}>{item.actionLabel}</Text>
+          </Touchable>
+        ) : null}
       </Touchable>
     </Animated.View>
   );

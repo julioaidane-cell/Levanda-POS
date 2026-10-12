@@ -72,6 +72,25 @@ export function formatDateTime(value: string | null | undefined): string {
   })}`;
 }
 
+/** Compact "time ago" label for feeds: `5m ago`, `3h ago`, `2d ago`. */
+export function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return '—';
+  const parsed = new Date(value.includes('T') ? value : value.replace(' ', 'T'));
+  if (Number.isNaN(parsed.getTime())) return value;
+
+  const minutes = Math.round((Date.now() - parsed.getTime()) / 60_000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.round(hours / 24);
+  if (days < 7) return `${days}d ago`;
+
+  return parsed.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+
 /** `"Kanzu Estate, Plot 1"` style one-liner; empty string when nothing is set. */
 export function joinLocation(parts: (string | null | undefined)[]): string {
   return parts

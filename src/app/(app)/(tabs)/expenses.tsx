@@ -1,22 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
-import { Badge, Chip, EmptyState, Header, ListItem, ScreenScroll, Section, StatTile } from '@/components/';
+import { Badge, Chip, EmptyState, ListItem, ScreenHeader, ScreenScroll, Section, StatTile } from '@/components/';
 import { mockExpenses } from '@/data/mock/expenses';
 import type { ExpenseCategory } from '@/types/modules';
-import { useActiveShop } from '@/store/shopStore';
 import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
 import { formatCurrency, formatDate } from '@/utils/format';
 
 const ALL = -1;
 
 export default function ExpensesScreen() {
-  const router = useRouter();
   const { colors } = useTheme();
   const styles = useStyles();
-  const activeShop = useActiveShop();
   const [category, setCategory] = useState<number>(ALL);
 
   const categories = useMemo<ExpenseCategory[]>(
@@ -37,13 +33,7 @@ export default function ExpensesScreen() {
 
   return (
     <View style={styles.root}>
-      <Header
-        title="Expenses"
-        subtitle={activeShop?.name ?? 'All shops'}
-        showShopSwitcher
-        onAddShop={() => router.push('/shops/create')}
-        onManageShops={() => router.push('/shops')}
-      />
+      <ScreenHeader />
 
       <ScreenScroll onRefresh={onRefresh}>
         <View style={styles.tileRow}>

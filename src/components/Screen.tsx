@@ -22,6 +22,7 @@ const useStyles = makeStyles((c) => ({
   flex: { flex: 1, backgroundColor: c.background },
   withTabBar: { paddingBottom: layout.tabBarHeight + spacing.xl },
   scrollContent: { padding: layout.screenPadding, paddingBottom: spacing.huge, gap: spacing.md },
+  withFAB: { paddingBottom: layout.fabClearance },
 }));
 
 /** Screen shell providing the background colour and optional keyboard inset. */
@@ -48,19 +49,27 @@ export interface ScreenScrollProps {
   onRefresh?: () => void;
   refreshing?: boolean;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  /** Adds bottom padding so the last row clears a floating action button. */
+  withFAB?: boolean;
 }
 
 /**
  * Scrollable body with sensible defaults: touch-friendly tap handling, drag to
  * dismiss the keyboard, and optional pull-to-refresh.
  */
-export function ScreenScroll({ children, onRefresh, refreshing = false, contentContainerStyle }: ScreenScrollProps) {
+export function ScreenScroll({
+  children,
+  onRefresh,
+  refreshing = false,
+  contentContainerStyle,
+  withFAB = false,
+}: ScreenScrollProps) {
   const styles = useStyles();
 
   return (
     <ScrollView
       style={styles.flex}
-      contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
+      contentContainerStyle={[styles.scrollContent, withFAB ? styles.withFAB : null, contentContainerStyle]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
       {...(onRefresh ? { onRefresh, refreshing } : {})}

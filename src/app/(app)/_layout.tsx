@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 
 import { useAuthStore } from '@/store/authStore';
 import { useCompanyStore } from '@/store/companyStore';
+import { useNotificationsStore } from '@/store/notificationsStore';
 import { useShopStore } from '@/store/shopStore';
 import { useTheme } from '@/theme';
 
@@ -34,6 +35,12 @@ export default function AppLayout() {
     }
   }, [status, shopsStatus, currencyStatus]);
 
+  // Restore the persisted "Push notifications" preference once per session.
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    void useNotificationsStore.getState().hydrate().catch(() => undefined);
+  }, [status]);
+
   if (status !== 'authenticated') {
     return <Redirect href="/(auth)/login" />;
   }
@@ -51,8 +58,7 @@ export default function AppLayout() {
       <Stack.Screen name="shops/[id]/edit" options={{ presentation: 'card' }} />
       <Stack.Screen name="products/create" options={{ presentation: 'modal' }} />
       <Stack.Screen name="products/[id]" options={{ presentation: 'card' }} />
-      <Stack.Screen name="customers" />
-      <Stack.Screen name="suppliers" />
+      <Stack.Screen name="notifications" options={{ presentation: 'modal' }} />
     </Stack>
   );
 }
