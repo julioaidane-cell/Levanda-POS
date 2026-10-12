@@ -26,6 +26,28 @@ export function formatNumber(value: string | number | null | undefined): string 
   return amount.toLocaleString('en-US', { maximumFractionDigits: 2 });
 }
 
+/**
+ * Compact currency for tight surfaces (stat tiles, list rows) where the full
+ * value would clip — `350000` → `TZS 350K`, `12500000` → `TZS 12.5M`. Detail
+ * screens keep using `formatCurrency` so the exact amount is always available.
+ */
+export function formatCurrencyCompact(value: string | number | null | undefined): string {
+  const amount = toNumber(value);
+  if (amount === null) return '—';
+  const abs = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  const trim = (n: number) => (Math.round(n * 10) / 10).toString();
+
+  let body: string;
+  if (abs >= 1_000_000_000) body = `${trim(abs / 1_000_000_000)}B`;
+  else if (abs >= 1_000_000) body = `${trim(abs / 1_000_000)}M`;
+  else if (abs >= 1_000) body = `${trim(abs / 1_000)}K`;
+  else body = abs.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+  const code = getCurrencyCode();
+  return code === null ? `${sign}${body}` : `${code} ${sign}${body}`;
+}
+
 /** `"25.00"` and `25` both become `25`. */
 export function toNumber(value: string | number | null | undefined): number | null {
   if (value === null || value === undefined || value === '') return null;

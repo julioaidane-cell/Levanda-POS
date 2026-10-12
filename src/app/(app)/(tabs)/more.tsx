@@ -131,5 +131,5 @@ const useStyles = makeStyles((c) => ({
   },
   emptyShops: { ...typography.body, color: c.textMuted, textAlign: 'center' },
   logout: { marginTop: spacing.md },
-  version: { ...typography.caption, color: c.textDisabled, textAlign: 'center' },
+  version: { ...typography.caption, color: c.textMuted, textAlign: 'center' },
 }));

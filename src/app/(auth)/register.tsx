@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Controller, useController, useForm } from 'react-hook-form';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -130,6 +131,7 @@ export default function RegisterScreen() {
 
   return (
     <View style={styles.root}>
+      <StatusBar style="light" />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
           style={styles.flex}
@@ -393,11 +395,11 @@ const useStyles = makeStyles((c) => ({
     borderRadius: radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: c.onChromeWash,
   },
-  brand: { ...typography.subheading, color: '#FFFFFF' },
-  heroTitle: { ...typography.title, color: '#FFFFFF' },
-  heroSubtitle: { ...typography.body, color: 'rgba(255,255,255,0.72)' },
+  brand: { ...typography.subheading, color: c.onChrome },
+  heroTitle: { ...typography.title, color: c.onChrome },
+  heroSubtitle: { ...typography.body, color: c.onChromeMuted },
   form: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, gap: spacing.lg },
   phoneRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
   phoneCodeBox: {

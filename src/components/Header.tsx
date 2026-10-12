@@ -29,12 +29,12 @@ export interface HeaderProps {
 
 const useStyles = makeStyles((c) => ({
   container: {
-    backgroundColor: c.chrome,
+    backgroundColor: c.headerBackground,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
     gap: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: c.chromeBorder,
+    borderBottomColor: c.border,
   },
   topRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   brandMark: {
@@ -47,8 +47,8 @@ const useStyles = makeStyles((c) => ({
   },
   iconButton: { padding: spacing.xs },
   titleWrap: { flex: 1, gap: 1 },
-  title: { ...typography.title, color: c.textInverse },
-  subtitle: { ...typography.caption, color: c.chromeMuted },
+  title: { ...typography.title, color: c.headerText },
+  subtitle: { ...typography.caption, color: c.headerSubtext },
   switcherRow: { flexDirection: 'row' },
 }));
 
@@ -84,11 +84,11 @@ export function Header({
             onPress={() => router.back()}
             style={styles.iconButton}
           >
-            <Ionicons name="chevron-back" size={22} color={colors.textInverse} />
+            <Ionicons name="chevron-back" size={22} color={colors.headerIcon} />
           </Touchable>
         ) : (
           <View style={styles.brandMark}>
-            <Ionicons name="storefront" size={15} color={colors.chrome} />
+            <Ionicons name="storefront" size={15} color={colors.onPrimary} />
           </View>
         )}
 
@@ -114,7 +114,7 @@ export function Header({
             onPress={action.onPress}
             style={styles.iconButton}
           >
-            <Ionicons name={action.icon} size={20} color={colors.textInverse} />
+            <Ionicons name={action.icon} size={20} color={colors.headerIcon} />
           </Touchable>
         ))}
       </View>

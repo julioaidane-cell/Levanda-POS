@@ -47,7 +47,10 @@ export function Avatar({ name, size = 44, shape = 'circle', style }: AvatarProps
     >
       <Text
         allowFontScaling={false}
-        style={[styles.text, { fontSize: size * 0.4, lineHeight: size * 0.5 }]}
+        style={[
+          styles.text,
+          { fontSize: size * 0.4, lineHeight: size * 0.5, color: colors.onChrome },
+        ]}
       >
         {initials}
       </Text>
@@ -57,5 +60,5 @@ export function Avatar({ name, size = 44, shape = 'circle', style }: AvatarProps
 
 const styles = StyleSheet.create({
   base: { alignItems: 'center', justifyContent: 'center' },
-  text: { ...typography.bodyStrong, color: '#FFFFFF' },
+  text: { ...typography.bodyStrong },
 });

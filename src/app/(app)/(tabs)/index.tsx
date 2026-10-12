@@ -10,7 +10,7 @@ import { useAsyncResource } from '@/hooks/useAsyncResource';
 import { SkeletonList } from '@/components/Loader';
 import { useActiveShop, useShopStore } from '@/store/shopStore';
 import { makeStyles, radius, spacing, typography, useTheme } from '@/theme';
-import { formatCurrency, formatNumber } from '@/utils/format';
+import { formatCurrency, formatCurrencyCompact, formatNumber } from '@/utils/format';
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -119,7 +119,7 @@ export default function DashboardScreen() {
               />
               <StatTile
                 label="Retail value"
-                value={products.isLoading ? '—' : formatCurrency(stockValue)}
+                value={products.isLoading ? '—' : formatCurrencyCompact(stockValue)}
                 tone="warning"
                 icon={<Ionicons name="cash-outline" size={16} color={colors.warning} />}
               />

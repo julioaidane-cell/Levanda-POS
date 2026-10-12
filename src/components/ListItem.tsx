@@ -36,12 +36,12 @@ const useStyles = makeStyles((c) => ({
   },
   activeRow: { borderColor: c.primary, backgroundColor: c.primaryTint },
   leading: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  textWrap: { flex: 1, gap: 2 },
+  textWrap: { flex: 1, flexShrink: 1, gap: 2 },
   title: { ...typography.subheading, color: c.text },
   mutedText: { color: c.textMuted },
   subtitle: { ...typography.caption, color: c.textMuted },
   badgeWrap: { marginTop: spacing.xxs, flexDirection: 'row' },
-  metaWrap: { alignItems: 'flex-end', gap: 2, maxWidth: 130 },
+  metaWrap: { alignItems: 'flex-end', gap: 2, minWidth: 72, maxWidth: 130, flexShrink: 0 },
   meta: { ...typography.subheading, color: c.text },
   metaCaption: { ...typography.caption, color: c.textMuted },
   chevron: { paddingLeft: spacing.xxs },
@@ -67,7 +67,7 @@ export function ListItem({
       {leading ? <View style={styles.leading}>{leading}</View> : null}
 
       <View style={styles.textWrap}>
-        <Text style={[styles.title, muted && styles.mutedText]} numberOfLines={1}>
+        <Text style={[styles.title, muted && styles.mutedText]} numberOfLines={2}>
           {title}
         </Text>
         {subtitle ? (
@@ -85,7 +85,12 @@ export function ListItem({
       {meta || metaCaption ? (
         <View style={styles.metaWrap}>
           {meta ? (
-            <Text style={[styles.meta, muted && styles.mutedText]} numberOfLines={1} adjustsFontSizeToFit>
+            <Text
+              style={[styles.meta, muted && styles.mutedText]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.7}
+            >
               {meta}
             </Text>
           ) : null}

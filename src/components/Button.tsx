@@ -42,7 +42,7 @@ const labelColorFor = (c: ColorPalette, variant: ButtonVariant): string => {
     case 'secondary':
       return c.text;
     case 'ghost':
-      return c.primary;
+      return c.primaryDark;
     case 'danger':
       return c.onDanger;
   }

@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
@@ -49,6 +50,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.root}>
+      <StatusBar style="light" />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
           style={styles.flex}
@@ -162,11 +164,11 @@ const useStyles = makeStyles((c) => ({
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: c.onChromeWash,
   },
-  brand: { ...typography.heading, color: '#FFFFFF' },
-  heroTitle: { ...typography.display, color: '#FFFFFF' },
-  heroSubtitle: { ...typography.body, color: 'rgba(255,255,255,0.72)' },
+  brand: { ...typography.heading, color: c.onChrome },
+  heroTitle: { ...typography.display, color: c.onChrome },
+  heroSubtitle: { ...typography.body, color: c.onChromeMuted },
   body: { flex: 1, justifyContent: 'space-between', padding: spacing.lg, gap: spacing.lg },
   card: { marginTop: -spacing.giant, gap: spacing.lg },
   submit: { marginTop: spacing.xs },

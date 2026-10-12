@@ -85,7 +85,7 @@ const useTileStyles = makeStyles((c) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: { ...typography.label, flex: 1 },
+  label: { ...typography.label, flex: 1, lineHeight: 16 },
   value: { ...typography.title, fontSize: 26, letterSpacing: -0.5 },
   delta: { ...typography.caption },
 }));
@@ -100,11 +100,16 @@ export function StatTile({ label, value, tone = 'default', icon, delta }: StatTi
     <View style={styles.tile}>
       <View style={styles.header}>
         {icon ? <View style={[styles.iconWrap, { backgroundColor: tint }]}>{icon}</View> : null}
-        <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={1}>
+        <Text style={[styles.label, { color: colors.textMuted }]} numberOfLines={2}>
           {label}
         </Text>
       </View>
-      <Text style={[styles.value, { color: accent }]} numberOfLines={1} adjustsFontSizeToFit>
+      <Text
+        style={[styles.value, { color: accent }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+      >
         {value}
       </Text>
       {delta ? <Text style={[styles.delta, { color: colors.textMuted }]}>{delta}</Text> : null}

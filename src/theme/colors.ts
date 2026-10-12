@@ -19,6 +19,7 @@ export const primaryScale = {
   400: '#4FC0D0',
   500: '#00A8C0',
   600: '#00889C',
+  650: '#007A8C',
   700: '#006B7A',
   800: '#004E59',
   900: '#003039',
@@ -66,12 +67,28 @@ export interface ColorPalette {
   onDanger: string;
   primaryScale: typeof primaryScale;
 
-  /* Chrome (app bar / tab bar) */
+  /* Chrome (always-dark brand surfaces: auth + product heroes) */
   chrome: string;
   chromeSoft: string;
   chromeMuted: string;
   chromeBorder: string;
   onChrome: string;
+  onChromeMuted: string;
+  onChromeWash: string;
+
+  /* App bar — theme-aware (light header in light mode, dark in dark mode) */
+  headerBackground: string;
+  headerText: string;
+  headerSubtext: string;
+  headerIcon: string;
+  headerPill: string;
+  headerPillBorder: string;
+
+  /* Bottom tab bar — theme-aware */
+  tabBarBackground: string;
+  tabBarBorder: string;
+  tabIconActive: string;
+  tabIconInactive: string;
 
   /* Surfaces */
   background: string;
@@ -83,10 +100,14 @@ export interface ColorPalette {
 
   /* Text */
   text: string;
+  /** Alias of `text`; the primary body/heading colour. */
+  textPrimary: string;
   textSecondary: string;
   textMuted: string;
   textDisabled: string;
   textInverse: string;
+  /** Text/icon colour on top of the brand `primary` fill. */
+  textOnPrimary: string;
 
   /* Semantic */
   success: string;
@@ -120,9 +141,11 @@ export interface ColorPalette {
 }
 
 export const lightColors: ColorPalette = {
-  primary: primaryScale[500],
-  primaryDark: primaryScale[600],
-  primaryDarker: primaryScale[700],
+  // Slightly-darkened brand teal so white button text clears 4.5:1 and teal
+  // icons clear 3:1 on the light background.
+  primary: primaryScale[650],
+  primaryDark: primaryScale[700],
+  primaryDarker: primaryScale[800],
   primaryLight: primaryScale[400],
   primarySoft: primaryScale[300],
   primaryTint: primaryScale[100],
@@ -131,11 +154,28 @@ export const lightColors: ColorPalette = {
   onDanger: neutralScale[0],
   primaryScale,
 
+  // Always-dark brand chrome, used by the auth + product heroes in both modes.
   chrome: '#0A0A0A',
   chromeSoft: neutralScale[900],
   chromeMuted: neutralScale[400],
   chromeBorder: 'rgba(255,255,255,0.10)',
   onChrome: neutralScale[0],
+  onChromeMuted: 'rgba(255,255,255,0.72)',
+  onChromeWash: 'rgba(255,255,255,0.14)',
+
+  // Theme-aware app bar: white surface, dark text, subtle teal pill.
+  headerBackground: neutralScale[0],
+  headerText: neutralScale[900],
+  headerSubtext: neutralScale[600],
+  headerIcon: neutralScale[700],
+  headerPill: primaryScale[50],
+  headerPillBorder: primaryScale[200],
+
+  // Theme-aware tab bar: white surface with a subtle top border.
+  tabBarBackground: neutralScale[0],
+  tabBarBorder: neutralScale[200],
+  tabIconActive: primaryScale[650],
+  tabIconInactive: neutralScale[500],
 
   background: neutralScale[50],
   surface: neutralScale[0],
@@ -145,10 +185,12 @@ export const lightColors: ColorPalette = {
   borderStrong: neutralScale[300],
 
   text: neutralScale[900],
+  textPrimary: neutralScale[900],
   textSecondary: neutralScale[600],
   textMuted: '#6B7280',
-  textDisabled: neutralScale[400],
+  textDisabled: neutralScale[500],
   textInverse: neutralScale[0],
+  textOnPrimary: neutralScale[0],
 
   success: '#1F9D55',
   successTint: '#E6F5EC',
@@ -194,6 +236,22 @@ export const darkColors: ColorPalette = {
   chromeMuted: neutralDark[300],
   chromeBorder: '#232B34',
   onChrome: '#FFFFFF',
+  onChromeMuted: 'rgba(255,255,255,0.72)',
+  onChromeWash: 'rgba(255,255,255,0.14)',
+
+  // Theme-aware app bar: raised dark surface, light text, teal-tinted pill.
+  headerBackground: '#1B222A',
+  headerText: '#F3F6F8',
+  headerSubtext: neutralDark[300],
+  headerIcon: neutralDark[100],
+  headerPill: '#10333B',
+  headerPillBorder: '#1F4A54',
+
+  // Theme-aware tab bar: raised dark surface with a visible top border.
+  tabBarBackground: '#1B222A',
+  tabBarBorder: '#29313A',
+  tabIconActive: primaryScale[300],
+  tabIconInactive: neutralDark[400],
 
   background: '#0B0E12',
   surface: '#151A20',
@@ -203,10 +261,12 @@ export const darkColors: ColorPalette = {
   borderStrong: '#3A434E',
 
   text: '#F3F6F8',
+  textPrimary: '#F3F6F8',
   textSecondary: neutralDark[300],
   textMuted: '#96A1AC',
-  textDisabled: neutralDark[500],
+  textDisabled: neutralDark[400],
   textInverse: '#0B0E12',
+  textOnPrimary: '#032126',
 
   success: '#4ADE80',
   successTint: '#12301F',

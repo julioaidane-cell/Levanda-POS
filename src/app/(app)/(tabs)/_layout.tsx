@@ -8,8 +8,8 @@ type IconProps = { color: ColorValue; size: number; focused: boolean };
 
 const useStyles = makeStyles((c) => ({
   tabBar: {
-    backgroundColor: c.chrome,
-    borderTopColor: c.chromeBorder,
+    backgroundColor: c.tabBarBackground,
+    borderTopColor: c.tabBarBorder,
     borderTopWidth: 1,
   },
   tabItem: { paddingTop: 6 },
@@ -17,8 +17,9 @@ const useStyles = makeStyles((c) => ({
 }));
 
 /**
- * Bottom tabs replace the web sidebar. The bar keeps the near-black chrome and
- * teal active tint measured from the Levanda POS screenshots.
+ * Bottom tabs replace the web sidebar. The bar is theme-aware: a light surface
+ * with dark labels in light mode, a raised dark surface in dark mode, with the
+ * brand teal marking the active tab.
  */
 export default function TabsLayout() {
   const { colors } = useTheme();
@@ -28,8 +29,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primarySoft,
-        tabBarInactiveTintColor: colors.chromeMuted,
+        tabBarActiveTintColor: colors.tabIconActive,
+        tabBarInactiveTintColor: colors.tabIconInactive,
         tabBarStyle: styles.tabBar,
         tabBarLabelStyle: styles.tabLabel,
         tabBarItemStyle: styles.tabItem,

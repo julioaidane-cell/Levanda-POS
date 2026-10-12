@@ -6,10 +6,10 @@ import {
   Inter_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/inter';
-import { Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider as NavigationThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -61,32 +61,53 @@ export default function RootLayout() {
 }
 
 function RootContent() {
-  const { colors: theme } = useTheme();
+  const { colors, isDark } = useTheme();
   const status = useAuthStore((state) => state.status);
 
+  // Hand the active palette to Expo Router so default screens, headers and
+  // transition surfaces never flash the wrong colour.
+  const navigationTheme = useMemo<Theme>(() => {
+    const base = isDark ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      dark: isDark,
+      colors: {
+        ...base.colors,
+        primary: colors.primary,
+        background: colors.background,
+        card: colors.surface,
+        text: colors.text,
+        border: colors.border,
+        notification: colors.danger,
+      },
+    };
+  }, [isDark, colors]);
+
   return (
-    <View style={[styles.root, { backgroundColor: theme.background }]}>
-      <StatusBar style="light" />
-      {status === 'idle' || status === 'loading' ? (
-        <View style={[styles.splash, { backgroundColor: theme.background }]}>
-          <Loader label="Starting Levanda POS…" />
-        </View>
-      ) : (
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: theme.background },
-            animation: 'fade',
-          }}
-        >
-          {status === 'authenticated' ? (
-            <Stack.Screen name="(app)" />
-          ) : (
-            <Stack.Screen name="(auth)" />
-          )}
-        </Stack>
-      )}
-    </View>
+    <NavigationThemeProvider value={navigationTheme}>
+      <View style={[styles.root, { backgroundColor: colors.background }]}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        {status === 'idle' || status === 'loading' ? (
+          <View style={[styles.splash, { backgroundColor: colors.background }]}>
+            <Loader label="Starting Levanda POS…" />
+          </View>
+        ) : (
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+              animation: 'fade',
+            }}
+          >
+            {status === 'authenticated' ? (
+              <Stack.Screen name="(app)" />
+            ) : (
+              <Stack.Screen name="(auth)" />
+            )}
+          </Stack>
+        )}
+      </View>
+    </NavigationThemeProvider>
   );
 }
 

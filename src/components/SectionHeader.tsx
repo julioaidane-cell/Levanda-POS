@@ -45,8 +45,8 @@ export function SectionHeader({ title, caption, actionLabel, onAction, style }: 
           onPress={onAction}
           style={styles.action}
         >
-          <Text style={[styles.actionLabel, { color: colors.primary }]}>{actionLabel}</Text>
-          <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+          <Text style={[styles.actionLabel, { color: colors.primaryDark }]}>{actionLabel}</Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.primaryDark} />
         </Touchable>
       ) : null}
     </View>

@@ -27,11 +27,11 @@ const useStyles = makeStyles((c) => ({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 1,
     borderRadius: radius.pill,
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    backgroundColor: c.headerPill,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: c.headerPillBorder,
   },
-  triggerText: { ...typography.label, color: c.textInverse, flexShrink: 1 },
+  triggerText: { ...typography.label, color: c.headerText, flexShrink: 1 },
 
   backdrop: { flex: 1, backgroundColor: c.overlay },
   modalRoot: { flex: 1, justifyContent: 'flex-end' },
@@ -127,11 +127,11 @@ export function ShopSwitcher({ onAddShop, onManageShops }: ShopSwitcherProps) {
         onPress={() => setOpen(true)}
         style={styles.trigger}
       >
-        <Ionicons name="storefront-outline" size={14} color={colors.primarySoft} />
+        <Ionicons name="storefront-outline" size={14} color={colors.primary} />
         <Text style={styles.triggerText} numberOfLines={1}>
           {activeShop?.name ?? 'Select a shop'}
         </Text>
-        <Ionicons name="swap-vertical" size={14} color={colors.primarySoft} />
+        <Ionicons name="swap-vertical" size={14} color={colors.primary} />
       </Touchable>
 
       <Modal visible={open} transparent animationType="none" onRequestClose={() => setOpen(false)} statusBarTranslucent>
