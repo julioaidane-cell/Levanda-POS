@@ -10,7 +10,7 @@ Suppliers and Customers modules.
 
 | Concern      | Choice                                            |
 | ------------ | ------------------------------------------------- |
-| Framework    | Expo SDK 57, React Native 0.86                    |
+| Framework    | Expo SDK 58, React Native 0.88                    |
 | Language     | TypeScript 6, `strict` + `noUncheckedIndexedAccess` |
 | Navigation   | Expo Router (file-based, typed routes)            |
 | Server state | Axios client with interceptors + Zustand stores   |
@@ -89,9 +89,8 @@ npm run typecheck    # tsc --noEmit
 npx expo-doctor      # dependency / config health
 ```
 
-There is no ESLint configuration in this project, so `npm run lint` is not a
-meaningful gate yet; `npm run typecheck` (with `noUnusedLocals` and
-`noUnusedParameters` enabled) is the enforced check.
+`npm run lint` runs Expo's ESLint configuration. `npm run typecheck` also checks
+the project with `noUnusedLocals` and `noUnusedParameters` enabled.
 
 ---
 

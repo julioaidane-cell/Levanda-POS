@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { useColorScheme, type ImageStyle, type TextStyle, type ViewStyle } from 'react-native';
 import { useReducedMotion } from 'react-native-reanimated';
 
 import { darkColors, lightColors, type ColorPalette } from './colors';
@@ -51,7 +51,9 @@ export function useThemeColors(): ColorPalette {
  * const styles = useStyles();
  * ```
  */
-export function makeStyles<T extends StyleSheet.NamedStyles<T>>(factory: (colors: ColorPalette) => T) {
+type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
+
+export function makeStyles<T extends NamedStyles<T>>(factory: (colors: ColorPalette) => T) {
   const cache = new Map<ColorPalette, T>();
   return function useStyles(): T {
     const { colors } = useContext(ThemeContext);

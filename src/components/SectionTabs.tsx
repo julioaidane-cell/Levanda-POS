@@ -8,6 +8,7 @@ import {
   type LayoutChangeEvent,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  type ScrollViewInstance,
 } from 'react-native';
 
 import { Touchable } from './Touchable';
@@ -129,7 +130,7 @@ export function SectionTabs() {
   const pathname = usePathname();
   const activeKey = activeSectionKey(pathname);
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const pillLayouts = useRef<Record<string, PillLayout>>({});
   const contentWidth = useRef(0);
   const viewportWidth = useRef(0);
