@@ -3,7 +3,7 @@
 React Native (Expo) client for the Levanda POS API: authentication, shop
 management, and shop-scoped product inventory, plus the static Expenses,
 Suppliers and Customers modules.
-
+![imagine alt](https://github.com/julioaidane-cell/Levanda-POS/blob/3881b7cbf35c972a3ed14857fcddd65e431d4007/WhatsApp%20Image%202026-10-26%20at%2010.29.28%20(1).jpeg)
 ---
 
 ## Tech stack
