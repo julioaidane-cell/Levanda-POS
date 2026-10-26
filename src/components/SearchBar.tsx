@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { forwardRef, useState } from 'react';
-import { TextInput, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
+import { TextInput, type StyleProp, type TextInputInstance, type TextInputProps, type ViewStyle } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { Touchable } from './Touchable';
@@ -28,7 +28,7 @@ const useStyles = makeStyles((c) => ({
   input: { flex: 1, ...typography.body, color: c.text, paddingVertical: spacing.sm },
 }));
 
-export const SearchBar = forwardRef<TextInput, SearchBarProps>(function SearchBar(
+export const SearchBar = forwardRef<TextInputInstance, SearchBarProps>(function SearchBar(
   { value, onChangeText, placeholder = 'Search…', containerStyle, onFocus, onBlur, ...rest },
   ref,
 ) {

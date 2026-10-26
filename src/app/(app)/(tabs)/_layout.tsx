@@ -24,6 +24,8 @@ const useStyles = makeStyles((c) => ({
 export default function TabsLayout() {
   const { colors } = useTheme();
   const styles = useStyles();
+  const tabIconColor = (color: ColorValue, focused: boolean) =>
+    typeof color === 'string' ? color : focused ? colors.tabIconActive : colors.tabIconInactive;
 
   return (
     <Tabs
@@ -42,36 +44,64 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }: IconProps) => <Ionicons name="grid-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }: IconProps) => (
+            <Ionicons
+              name="grid-outline"
+              size={size}
+              color={tabIconColor(color, focused)}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="products/index"
         options={{
           title: 'Products',
-          tabBarIcon: ({ color, size }: IconProps) => <Ionicons name="cube-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }: IconProps) => (
+            <Ionicons
+              name="cube-outline"
+              size={size}
+              color={tabIconColor(color, focused)}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="shops/index"
         options={{
           title: 'Shops',
-          tabBarIcon: ({ color, size }: IconProps) => <Ionicons name="storefront-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }: IconProps) => (
+            <Ionicons
+              name="storefront-outline"
+              size={size}
+              color={tabIconColor(color, focused)}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="expenses"
         options={{
           title: 'Expenses',
-          tabBarIcon: ({ color, size }: IconProps) => <Ionicons name="receipt-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }: IconProps) => (
+            <Ionicons
+              name="receipt-outline"
+              size={size}
+              color={tabIconColor(color, focused)}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
           title: 'More',
-          tabBarIcon: ({ color, size }: IconProps) => (
-            <Ionicons name="ellipsis-horizontal-circle-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }: IconProps) => (
+            <Ionicons
+              name="ellipsis-horizontal-circle-outline"
+              size={size}
+              color={tabIconColor(color, focused)}
+            />
           ),
         }}
       />

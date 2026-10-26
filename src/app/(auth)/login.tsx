@@ -113,7 +113,7 @@ export default function LoginScreen() {
                     secureTextEntry
                     textContentType="password"
                     returnKeyType="go"
-                    onSubmitEditing={onSubmit}
+                    onSubmitEditing={() => void onSubmit()}
                     required
                   />
                 )}
